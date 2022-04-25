@@ -6,7 +6,7 @@
 import scrapy
 
 
-class CisaBulletinsItem(scrapy.Item):
+class CognosItem(scrapy.Item):
     # define the fields for your item here like:
     # name = scrapy.Field()
     pass
