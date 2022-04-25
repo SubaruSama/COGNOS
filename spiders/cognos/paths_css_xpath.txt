@@ -1,0 +1,23 @@
+#tid_7621 > a:nth-child(1)
+#tid_6700 > a:nth-child(1)
+
+#tid_6700
+tr.inline_row:nth-child(5) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+tr.inline_row:nth-child(4) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+tr.inline_row:nth-child(6) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+.wrapper
+tr.inline_row:nth-child(15) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+
+/html/body/div[1]/div/div[4]/table[1]/tbody/tr[2]/td/div/div[1]/div[1]/div[2]/strong/span/text()
+
+#post_19525 > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)
+
+#posts_container
+.wrapper
+table.tborder:nth-child(3) > tbody:nth-child(1)
+#post_19525 > div:nth-child(2)
+
+head > title:nth-child(1)
+/html/head/title
+
+for i in response.selector.xpath('//*[@id="posts"]/div[*]/div[*]').getall():
