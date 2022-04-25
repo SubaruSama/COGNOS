@@ -167,3 +167,6 @@ lib64/
 lib64
 share/
 pyvenv.cfg
+
+# Exclude extra repos for testing
+repo_auxiliares/
