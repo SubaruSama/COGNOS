@@ -21,3 +21,19 @@ head > title:nth-child(1)
 /html/head/title
 
 for i in response.selector.xpath('//*[@id="posts"]/div[*]/div[*]').getall():
+
+(//*[@id="post_*"]/div[*]/div[*]/strong/span/a/text()).get()
+
+#post_19525 > div.post_author.scaleimages > div.author_information > strong > span > a
+#post_19546 > div.post_author.scaleimages > div.author_information > strong > span > a
+#post_19627 > div.post_author.scaleimages > div.author_information > strong > span > a > span > strong
+
+#post_19525 > div.post_author.scaleimages > div.author_information
+#post_19525 > div.post_author.scaleimages
+#posts
+#post_19525
+#container > div.wrapper > table.tborder.tfixed.clear > tbody > tr:nth-child(2)
+//*[@id="container"]/div[4]/table[1]/tbody/tr[2]
+//*[@id="posts"]/div[1]/div[2]/
+//*[@id="post_19525"]/div[1]/div[2]
+//*[@id="post_19546"]/div[1]/div[2]
