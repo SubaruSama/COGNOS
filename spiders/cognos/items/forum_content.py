@@ -1,9 +1,11 @@
-import scrapy
+from scrapy import Item, Field
 
-class ForumContent(scrapy.Item):
-    username = scrapy.Field()
-    posts_quantity = scrapy.Field()
-    date_joined = scrapy.Field()
-    reputation = scrapy.Field()
-    info_date_post = scrapy.Field()
-    post_content = scrapy.Field()
+class ForumContent(Item):
+    username = Field()
+    posts_quantity = Field()
+    date_joined = Field()
+    reputation = Field()
+    info_date_post = Field()
+    post_content = Field()
+    is_admin = Field()
+    is_special_user = Field()

@@ -37,3 +37,6 @@ for i in response.selector.xpath('//*[@id="posts"]/div[*]/div[*]').getall():
 //*[@id="posts"]/div[1]/div[2]/
 //*[@id="post_19525"]/div[1]/div[2]
 //*[@id="post_19546"]/div[1]/div[2]
+
+/html/body/div[1]/div/div[4]/table[1]/tbody/tr[2]/td/div/div[2]/div[1]/div[2]/strong/span/a/span
+/html/body/div[1]/div/div[4]/table[1]/tbody/tr[2]/td/div/div[3]/div[1]/div[2]/strong/span/a/span/strong
