@@ -1,4 +1,4 @@
-1. O crawler vai bater na url https://greysec.net/forumdisplay.php?fid=46 (Done)
+1. O crawler vai bater na url https://greysec.net/forumdisplay.php?fid=46 (Done) 
 2. Para cada link que ele achar, vai enviar para a função de enviar a URL para a função que irá entrar no post
 3. Ao entrar no enviado pela função anterior, pegar os seguintes itens:
     3.1 O nome do usuário
@@ -7,3 +7,4 @@
     3.4 Reputação
     3.5 Informações de data e horário da postagem
     3.6 Conteúdo do post
+4. Se existir link de next page, entrar nesse link e realizar o passo 2
