@@ -1,8 +1,9 @@
-1. O crawler vai bater na url https://greysec.net/forumdisplay.php?fid=46 (Done) 
+1. O crawler vai bater na url https://greysec.net/forumdisplay.php?fid=46; (Done) 
 2. Para cada link que ele achar, verificar:
-    2.1 Se for um link de um post, vai enviar para a função de enviar a URL para a função que irá entrar no post e enviar para a função de scraping
-    2.2 Se for um link de next page, vai entrar e extrair os links da nova página, e depois irá enviar para o passo 2.1
-3. Ao entrar no enviado pela função anterior, pegar os seguintes itens:
+    2.1 Se for um link de um post, vai enviar para a função de enviar a URL para o scraping;
+    2.2 Se for um link de next page, vai seguir esse link:
+        2.2.1 vai entrar e extrair os links da nova página de posts, e depois irá enviar para o passo 2.1
+3. Função de scraping recebido pelo passo 2:
     3.1 O nome do usuário
     3.2 Quantidade de posts
     3.3 Joined
