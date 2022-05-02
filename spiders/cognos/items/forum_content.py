@@ -9,3 +9,4 @@ class ForumContent(Item):
     post_content = Field()
     is_admin = Field()
     is_special_user = Field()
+    title = Field()
