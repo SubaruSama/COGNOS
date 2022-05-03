@@ -10,3 +10,8 @@
     3.4 Reputação
     3.5 Informações de data e horário da postagem
     3.6 Conteúdo do post
+
+
+Os itens estão pegando apenas o primeiro autor e apenas salvando esse como se fosse um item so, junto com os dados da postagem.
+Colocar dentro de um loop e criar um selector, para que a cada página fazer um scrape item por item. No momento ele só está pegando o primeiro que pega e salva no item, ignorando os outros.
+Porém os posts contents está pegando direitinho.
