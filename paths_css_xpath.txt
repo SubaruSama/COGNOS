@@ -1,0 +1,54 @@
+#tid_7621 > a:nth-child(1)
+#tid_6700 > a:nth-child(1)
+
+#tid_6700
+tr.inline_row:nth-child(5) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+tr.inline_row:nth-child(4) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+tr.inline_row:nth-child(6) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+.wrapper
+tr.inline_row:nth-child(15) > td:nth-child(3) > div:nth-child(1) > span:nth-child(1)
+
+/html/body/div[1]/div/div[4]/table[1]/tbody/tr[2]/td/div/div[1]/div[1]/div[2]/strong/span/text()
+
+#post_19525 > div:nth-child(1) > div:nth-child(3) > div:nth-child(1)
+
+#posts_container
+.wrapper
+table.tborder:nth-child(3) > tbody:nth-child(1)
+#post_19525 > div:nth-child(2)
+
+head > title:nth-child(1)
+/html/head/title
+
+for i in response.selector.xpath('//*[@id="posts"]/div[*]/div[*]').getall():
+
+(//*[@id="post_*"]/div[*]/div[*]/strong/span/a/text()).get()
+
+#post_19525 > div.post_author.scaleimages > div.author_information > strong > span > a
+#post_19546 > div.post_author.scaleimages > div.author_information > strong > span > a
+#post_19627 > div.post_author.scaleimages > div.author_information > strong > span > a > span > strong
+
+#post_19525 > div.post_author.scaleimages > div.author_information
+#post_19525 > div.post_author.scaleimages
+#posts
+#post_19525
+#container > div.wrapper > table.tborder.tfixed.clear > tbody > tr:nth-child(2)
+//*[@id="container"]/div[4]/table[1]/tbody/tr[2]
+//*[@id="posts"]/div[1]/div[2]/
+//*[@id="post_19525"]/div[1]/div[2]
+//*[@id="post_19546"]/div[1]/div[2]
+
+/html/body/div[1]/div/div[4]/table[1]/tbody/tr[2]/td/div/div[2]/div[1]/div[2]/strong/span/a/span
+/html/body/div[1]/div/div[4]/table[1]/tbody/tr[2]/td/div/div[3]/div[1]/div[2]/strong/span/a/span/strong
+
+
+/html/body/div/div/div[4]/div[2]/div/a[2]
+/html/body/div[1]/div[1]/div[4]/div[2]/div[1]/a[2]
+
+next page = response.css('html body div#content div#container div.wrapper div.float_left div.pagination a.pagination_next::attr(href)').get()
+
+
+div.float_left:nth-child(4) > div:nth-child(1) > span:nth-child(2)
+div.float_left:nth-child(1) > div:nth-child(1) > span:nth-child(2)
+
+//*[@id="posts"]/div[*]/div[1]/div[*] pega todos os usuarios, independente se for usuario normal ou nao
