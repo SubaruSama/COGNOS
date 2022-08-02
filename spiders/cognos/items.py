@@ -19,3 +19,4 @@ class CognosItem(Item):
     # is_admin = Field() Uso futuro. Muito provavel terei que remodelar
     # is_special_user = Field() Uso futuro. Muito provavel terei que remodelar
     title = Field(input_processor=MapCompose(remove_tags))
+    post_interatcion = Field(input_processor=MapCompose(remove_tags))
