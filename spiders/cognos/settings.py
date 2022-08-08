@@ -100,3 +100,8 @@ FAKEUSERAGENT_PROVIDERS = [
     'scrapy_fake_useragent.providers.FakerProvider',  
     'scrapy_fake_useragent.providers.FixedUserAgentProvider',
 ]
+
+# Logging
+LOG_ENABLED = True
+LOG_LEVEL = 'INFO'
+LOG_FILE = ''
