@@ -1,34 +1,62 @@
 import scrapy
-
+from scrapy.http import FormRequest
+from cognos.items import CognosItem
+from scrapy.loader import ItemLoader
 
 class SinisterLySpiderSpider(scrapy.Spider):
     name = 'sinister_ly_spider'
     allowed_domains = ['sinister.ly']
-    start_urls = ['http://sinister.ly/']
-    custom_settings = {
-        'LOG_LEVEL': 'INFO'
-    }
+    start_urls = ['https://sinister.ly/member.php?action=login']
 
-    # Preciso estar logado para procurar as coisas; nome do cookie: mybbuser
-    # Gerar o token de sessão e passar por aqui; como? ler no código do onionjuicer
     # 1
-    def login(self):
-        pass
+    def parse(self, response):
+        my_post_key = self.get_my_post_key(response)
+        self.logger.info(f'Post key: {my_post_key}')
+        username = 'iphenneas'
+        password = 'plS[C?uw<,CU:g^4_a5?~\';KPZ.**S'
+
+        return scrapy.FormRequest.from_response(
+            response,
+            formdata = {
+                'my_post_key': my_post_key,
+                'username': username,
+                'password': password
+            },
+            callback=self.make_search
+        )
+    
+    # 1.1
+    def get_my_post_key(self, response):
+        my_post_key = response.xpath('/html/body/div[3]/div[2]/form/input[3]/@value').get()
+        
+        return my_post_key
 
     # 3
-    def make_search(self):
-        keywords = ['vulnerability', 'exploit']
-        # Juntar start_urls com keyowrds
-        # Seguir quando tiver link para a próxima página
-        # follow_link = CSS path que contém o link para a próxima página
-        # if follow_link is not None:
-        #     chamada recursiva self.make_search
+    def extract_content_from_threads(self, response):
+        # extração dos dados e guardar no CognosItem
         pass
 
     # 2
-    def start_requests(self):
-        yield scrapy.Request(url=self.start_urls[0], callback=self.make_search)
-
-    # 4
-    def parse(self, response):
+    def make_search(self, response):
+        keywords = ['vulnerability', 'exploit']
+        # Juntar start_urls com keyowrds
+        # Chamar self.follow_link, que irá retornar um Request para self.make_search quando tiver link para a próxima página
+        # follow_link = CSS path que contém o link para a próxima página
+        # if follow_link is not None:
+        #     chamada recursiva self.make_search
+        # callback para self.follow_link para entrar na thread
+        # quando entrar na thread, chamar self.parse para extrair os dados
+        # quando na thread tiver próxima pagina, chamar self.follow_link e fazer assim até não ter mais next page
         pass
+    
+    # 2.1
+    def follow_link(self, response):
+        pass
+
+    # 1.2
+    def is_logged_in(self, response):
+        # Checar se consegui logar
+        pass
+
+
+
