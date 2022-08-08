@@ -13,7 +13,7 @@ class SinisterLySpiderSpider(scrapy.Spider):
         my_post_key = self.get_my_post_key(response)
         self.logger.info(f'Post key: {my_post_key}')
         username = 'iphenneas'
-        password = 'plS[C?uw<,CU:g^4_a5?~\';KPZ.**S'
+        password = ''
 
         return scrapy.FormRequest.from_response(
             response,
