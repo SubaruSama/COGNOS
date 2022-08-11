@@ -1,0 +1,34 @@
+{
+    // Use o IntelliSense para saber mais sobre os atributos possíveis.
+    // Focalizar para exibir as descrições dos atributos existentes.
+    // Para obter mais informações, acesse: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Scrapy Spider Debug: sinister_ly_spider",
+            "type": "python",
+            "request": "launch",
+            "module": "scrapy",
+            "cwd": "${fileDirname}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "crawl",
+                "sinister_ly_spider"
+            ]
+        },
+        {
+            "name": "Scrapy Spider Debug: forum2",
+            "type": "python",
+            "request": "launch",
+            "module": "scrapy",
+            "cwd": "${fileDirname}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "args": [
+                "crawl",
+                "forum2"
+            ]
+        }
+    ]
+}
