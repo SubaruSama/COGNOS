@@ -171,3 +171,6 @@ pyvenv.cfg
 # Exclude extra repos for testing
 repo_auxiliares/*
 doccano_spacy/
+
+# Credentials
+credentials.toml
