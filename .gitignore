@@ -174,3 +174,4 @@ doccano_spacy/
 
 # Credentials
 credentials.toml
+spiders_credentials/
