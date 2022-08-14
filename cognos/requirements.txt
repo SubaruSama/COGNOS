@@ -1,3 +1,4 @@
 scrapy
 spacy
 scrapy-fake-useragent
+pytomlpp
