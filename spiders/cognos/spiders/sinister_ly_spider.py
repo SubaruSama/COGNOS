@@ -5,23 +5,25 @@ from cognos.items import CognosItem
 from scrapy.loader import ItemLoader
 import pytomlpp
 
+
 class SinisterLySpiderSpider(scrapy.Spider):
     name = 'sinister_ly_spider'
     allowed_domains = ['sinister.ly']
     start_urls = ['https://sinister.ly/member.php?action=login']
 
+    def load_from_toml_file(self):
+        with open('../spiders_credentials/credentials.toml') as toml_file:
+            return pytomlpp.load(toml_file)
+
     # 1
     def parse(self, response):
+        toml_content = self.load_from_toml_file()
         my_post_key = self.get_my_post_key(response)
         self.logger.info(f'Post key: {my_post_key}')
         # Salvar em um arquivo (dotfile ou toml) separado e não commitar pro github
         # Burner account
-        # criar um arquivo toml com as credenciais e passar pras variaveis
-        with open('../spiders_credentials/credentials.toml') as toml_file:
-            toml_string = pytomlpp.load(toml_file)
-
-        username = toml_string["sinisterly"]["username"]
-        password = toml_string["sinisterly"]["password"]
+        username = toml_content["sinisterly"]["username"]
+        password = toml_content["sinisterly"]["password"]
 
         return FormRequest.from_response(
             response,
