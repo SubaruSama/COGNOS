@@ -95,6 +95,9 @@ class SinisterLySpiderSpider(scrapy.Spider):
         # Como cada href é apenas o path, preciso pegar o path e montar junto com o domínio para enviar para extrair os dados
         paths = response.selector.css(css_thread_post_pattern).getall()
 
+        # from scrapy.shell import inspect_response
+        # inspect_response(response, self)
+
         for path in paths:
             yield Request(
                 url='https://{allowed_domains}/{path}'.format(allowed_domains=self.allowed_domains[0],
@@ -112,8 +115,8 @@ class SinisterLySpiderSpider(scrapy.Spider):
     # 3
     def extract_content_from_threads(self, response):
         # extração dos dados e guardar no CognosItem
-        self.logger.info('----------- Title: %s -----------', response.xpath('/html/body/div[3]/div[2]/table/tbody/tr[1]/td/strong/text()').get())
-        contents = response.selector.xpath('')
+        self.logger.info('----------- Title: %s -----------', response.xpath('/html/head/title/text()').get())
+        contents = response.selector.xpath('//*[@id="posts"]/div[*]')
 
         # test
         print(response)
@@ -122,10 +125,10 @@ class SinisterLySpiderSpider(scrapy.Spider):
             loader = ItemLoader(item=CognosItem(), selector=content)
 
             # TODO
-            loader.add_xpath('title', '')
-            loader.add_xpath('username', '')
-            loader.add_xpath('reputation', '')
-            loader.add_xpath('info_date_post', '')
-            loader.add_xpath('post_content')
+            loader.add_xpath('title', '/html/head/title')
+            loader.add_xpath('username', '//*[@id="posts"]/div[*]/div[1]/div[2]/strong/span/a/span')
+            # loader.add_xpath('reputation', '')
+            loader.add_xpath('info_date_post', '//*[@id="posts"]/div[*]/div[2]/div[1]/span[2]/span')
+            loader.add_xpath('post_content', '//*[@id="posts"]/div[*]/div[2]/div[2]')
 
         yield loader.load_item()
