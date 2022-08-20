@@ -1,3 +1,4 @@
+from xmlrpc.client import Boolean
 import scrapy
 from scrapy import Request
 from scrapy.http import FormRequest
@@ -95,9 +96,6 @@ class SinisterLySpiderSpider(scrapy.Spider):
         # Como cada href é apenas o path, preciso pegar o path e montar junto com o domínio para enviar para extrair os dados
         paths = response.selector.css(css_thread_post_pattern).getall()
 
-        # from scrapy.shell import inspect_response
-        # inspect_response(response, self)
-
         for path in paths:
             yield Request(
                 url='https://{allowed_domains}/{path}'.format(allowed_domains=self.allowed_domains[0],
@@ -106,25 +104,34 @@ class SinisterLySpiderSpider(scrapy.Spider):
                 callback=self.extract_content_from_threads
             )
 
-        xpath_next_page_pattern = '/html/body/div[3]/div[2]/table[3]/tr/td[1]/div/a[6]/@href'
-        xpath_next_page_link = response.xpath(xpath_next_page_pattern).get()
+        xpath_next_page = '/html//a[@class = "pagination_next"]/@href'
+        xpath_next_page_link = response.xpath(xpath_next_page).get()
 
         if xpath_next_page_link is not None:
+            self.logger.info(f'Current page: {response.url}')
             yield response.follow(xpath_next_page_link, callback=self.extract_URL_from_search)
+        else:
+            self.logger.error('Something went wrong.')
+            self.logger.info(f'Current page: {response.url}')
 
     # 3
     def extract_content_from_threads(self, response):
         # extração dos dados e guardar no CognosItem
-        self.logger.info('----------- Title: %s -----------', response.xpath('/html/head/title/text()').get())
+        self.logger.info('||| Title: %s |||', response.xpath('/html/head/title/text()').get())
         contents = response.selector.xpath('//*[@id="posts"]/div[*]')
+        xpath_next_page = '/html//a[@class = "pagination_next"]/@href'
+        next_page = response.xpath(xpath_next_page).get()
 
-        # test
-        print(response)
+        if next_page is not None:
+            self.logger.info(f'Following the next page inside this thread: {next_page}')
+            yield Request(
+                url=f'https://{self.allowed_domains[0]}/{next_page}',
+                callback=self.follow_post_inside_thread
+            )
 
         for content in contents:
             loader = ItemLoader(item=CognosItem(), selector=content)
 
-            # TODO
             loader.add_xpath('title', '/html/head/title')
             loader.add_xpath('username', '//*[@id="posts"]/div[*]/div[1]/div[2]/strong/span/a/span')
             # loader.add_xpath('reputation', '')
@@ -132,3 +139,11 @@ class SinisterLySpiderSpider(scrapy.Spider):
             loader.add_xpath('post_content', '//*[@id="posts"]/div[*]/div[2]/div[2]')
 
         yield loader.load_item()
+
+    def follow_post_inside_thread(self, response):
+        yield Request(url=response.url, callback=self.extract_content_from_threads)
+
+    # For debugging reasons
+    def debug(self, response):
+        from scrapy.shell import inspect_response
+        inspect_response(response, self)
