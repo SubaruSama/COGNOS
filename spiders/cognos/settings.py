@@ -34,7 +34,7 @@ ROBOTSTXT_OBEY = True
 #COOKIES_ENABLED = False
 
 # Disable Telnet Console (enabled by default)
-#TELNETCONSOLE_ENABLED = False
+TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
 #DEFAULT_REQUEST_HEADERS = {
@@ -62,9 +62,9 @@ ROBOTSTXT_OBEY = True
 
 # Configure item pipelines
 # See https://docs.scrapy.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
-#    'cognos.pipelines.CognosPipeline': 300,
-#}
+ITEM_PIPELINES = {
+    'cognos.pipelines.CognosPipeline': 300,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
@@ -100,3 +100,8 @@ FAKEUSERAGENT_PROVIDERS = [
     'scrapy_fake_useragent.providers.FakerProvider',  
     'scrapy_fake_useragent.providers.FixedUserAgentProvider',
 ]
+
+# Logging
+LOG_ENABLED = True
+LOG_LEVEL = 'INFO'
+LOG_FILE = ''
