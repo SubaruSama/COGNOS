@@ -10,6 +10,7 @@ from w3lib.html import remove_comments, remove_entities, remove_tags
 
 
 class CognosItem(Item):
+    uuid = Field() # Not used yet
     username = Field(input_processor=MapCompose(remove_tags))
     posts_quantity = Field(input_processor=MapCompose(remove_tags))
     date_joined = Field(input_processor=MapCompose(remove_tags))
