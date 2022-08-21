@@ -175,3 +175,6 @@ doccano_spacy/
 # Credentials
 credentials.toml
 spiders_credentials/
+
+# Notes
+anotações.txt

@@ -20,3 +20,4 @@ class CognosItem(Item):
     # is_special_user = Field() Uso futuro. Muito provavel terei que remodelar
     title = Field(input_processor=MapCompose(remove_tags))
     post_interatcion = Field(input_processor=MapCompose(remove_tags))
+    url = Field(input_processor=MapCompose(remove_tags))

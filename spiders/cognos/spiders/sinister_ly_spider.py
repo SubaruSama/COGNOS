@@ -10,13 +10,18 @@ import pytomlpp
 class SinisterLySpiderSpider(scrapy.Spider):
     name = 'sinister_ly_spider'
     allowed_domains = ['sinister.ly']
-    start_urls = ['https://sinister.ly/member.php?action=login']
+    start_urls = [
+        'https://sinister.ly/member.php?action=login',
+        'https://sinister.ly/Thread-Sites-which-have-been-successful-and-unsuccessful?highlight=vulnerability',
+        'https://sinister.ly/Thread-Tutorial-Ask-me-anything-about-SE?highlight=vulnerability'
+    ]
 
+    # 1
     def load_from_toml_file(self):
         with open('../spiders_credentials/credentials.toml') as toml_file:
             return pytomlpp.load(toml_file)
 
-    # 1
+    # 2
     def parse(self, response):
         toml_content = self.load_from_toml_file()
         my_post_key = self.get_my_post_key(response)
@@ -36,26 +41,25 @@ class SinisterLySpiderSpider(scrapy.Spider):
             callback=self.after_login
         )
     
-    # 1.1
+    # 2.1
     def get_my_post_key(self, response):
         return response.xpath('/html/body/div[3]/div[2]/form/input[3]/@value').get()
 
-    # 1.2
+    # 2.2
     def after_login(self, response):
         if response.status != 200:
             self.logger.error('Erro ao logar.')
             return
         else:
-            yield Request(url=f'https://{self.allowed_domains[0]}/search.php', callback=self.make_search)
+            yield Request(url=f'https://{self.allowed_domains[0]}/search.php', callback=self.search)
         # Checar se consegui logar
         # Fazer um login errado para ver o que retorna
 
-    # 2
-    def make_search(self, response):
+    # 3
+    def search(self, response):
         self.logger.info('I am here')
         keywords = ['vulnerability', 'exploit']
         search_url = response.request.url
-        #search_url = f'https://{self.allowed_domains[0]}/search.php'
 
         for keyword in keywords:
             return FormRequest(
@@ -85,10 +89,6 @@ class SinisterLySpiderSpider(scrapy.Spider):
         # callback para self.follow_link para entrar na thread
         # quando entrar na thread, chamar self.parse para extrair os dados
         # quando na thread tiver próxima pagina, chamar self.follow_link e fazer assim até não ter mais next page
-    
-    # 2.1
-    def follow_link_next_page(self, response):
-        pass
 
     # 2.2
     def extract_URL_from_search(self, response):
@@ -98,9 +98,7 @@ class SinisterLySpiderSpider(scrapy.Spider):
 
         for path in paths:
             yield Request(
-                url='https://{allowed_domains}/{path}'.format(allowed_domains=self.allowed_domains[0],
-                path=path
-                ),
+                url=f'https://{self.allowed_domains[0]}/{path}',
                 callback=self.extract_content_from_threads
             )
 
@@ -118,16 +116,8 @@ class SinisterLySpiderSpider(scrapy.Spider):
     def extract_content_from_threads(self, response):
         # extração dos dados e guardar no CognosItem
         self.logger.info('||| Title: %s |||', response.xpath('/html/head/title/text()').get())
+        self.logger.info(f'URL from response: {response.url}')
         contents = response.selector.xpath('//*[@id="posts"]/div[*]')
-        xpath_next_page = '/html//a[@class = "pagination_next"]/@href'
-        next_page = response.xpath(xpath_next_page).get()
-
-        if next_page is not None:
-            self.logger.info(f'Following the next page inside this thread: {next_page}')
-            yield Request(
-                url=f'https://{self.allowed_domains[0]}/{next_page}',
-                callback=self.follow_post_inside_thread
-            )
 
         for content in contents:
             loader = ItemLoader(item=CognosItem(), selector=content)
@@ -137,11 +127,18 @@ class SinisterLySpiderSpider(scrapy.Spider):
             # loader.add_xpath('reputation', '')
             loader.add_xpath('info_date_post', '//*[@id="posts"]/div[*]/div[2]/div[1]/span[2]/span')
             loader.add_xpath('post_content', '//*[@id="posts"]/div[*]/div[2]/div[2]')
+            loader.add_value('url', response.url)
+            
+            return loader.load_item()
 
-        yield loader.load_item()
+        next_page = response.xpath('/html//a[@class = "pagination_next"]/@href').get()
 
-    def follow_post_inside_thread(self, response):
-        yield Request(url=response.url, callback=self.extract_content_from_threads)
+        if next_page is not None:
+            self.logger.info(f'URL from response.urljoin: {response.urljoin(next_page)}')
+            yield Request(url=response.urljoin(next_page), callback=self.extract_content_from_threads)
+
+    # def follow_post_inside_thread(self, response):
+    #     yield Request(url=response.url, callback=self.extract_content_from_threads)
 
     # For debugging reasons
     def debug(self, response):
