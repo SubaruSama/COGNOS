@@ -127,6 +127,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+env_*/
+venv_*/
 
 # Spyder project settings
 .spyderproject
@@ -178,5 +180,14 @@ spiders_credentials/
 
 # Notes
 anotações.txt
+notas.txt
+notas.md
 
+# Datasets
 datasets
+
+# VSCode stuff
+.vscode/
+
+# Exe stuff
+*.exe
