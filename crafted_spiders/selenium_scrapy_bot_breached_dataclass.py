@@ -1,5 +1,5 @@
-from datetime import date
 import uuid
+from datetime import date
 from typing import List
 from dataclasses import dataclass
 
