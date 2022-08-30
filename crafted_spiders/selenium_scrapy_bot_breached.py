@@ -1,12 +1,12 @@
+import uuid
 import logging
 import pytomlpp
-import uuid
-from .selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Dataclass_Breached
 from scrapy import Selector
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
+from .selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Dataclass_Breached
 
 CREDENTIALS = './credentials.toml'
 logging.basicConfig(level=logging.DEBUG)
@@ -85,11 +85,25 @@ def extract_contents_from_posts(html_content: Selector) -> str:
     logging.info(html_content.xpath('/html/head/title/text()').get())
     save_to_json(item)
 
+    if next_page_present():
+        click_next_page()
+        extract_contents_from_posts(html_content)
+
 def save_to_json():
     raise NotImplementedError
 
+def click_next_page() -> None:
+    next_page_button = browser.find_element(By.CLASS_NAME, 'pagination_next')
+    next_page_button.click()
+
 def next_page_present() -> bool:
-    raise NotImplementedError
+    xpath_next_page_pattern = '/html//a[@class = "pagination_next"]/@href'
+    xpath_next_page = Selector.xpath(xpath_next_page_pattern).get()
+
+    if xpath_next_page is not None:
+        return True
+
+    return False
 
 browser = open_browser()
 go_to_page('https://breached.to/member?action=login')
