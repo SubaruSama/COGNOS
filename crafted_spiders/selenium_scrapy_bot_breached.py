@@ -6,9 +6,9 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
-from .selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Dataclass_Breached
+from selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Dataclass_Breached
 
-CREDENTIALS = './credentials.toml'
+CREDENTIALS = 'spiders/cognos/spiders_credentials/credentials.toml'
 logging.basicConfig(level=logging.DEBUG)
 
 def load_credentials(path: str) -> tuple:
@@ -25,6 +25,7 @@ def get_my_post_key() -> str:
     return browser.find_element(By.XPATH, '/html/body/div[1]/main/form/input[3]').get_attribute('value')
 
 def open_browser() -> WebDriver:
+
     return webdriver.Chrome()
 
 def close_browser() -> None:
@@ -105,26 +106,27 @@ def next_page_present() -> bool:
 
     return False
 
-browser = open_browser()
-go_to_page('https://breached.to/member?action=login')
-username, password, my_post_key = load_credentials(CREDENTIALS)
-html_content = selenium_page_source(browser)
-scrapy_selector = Selector(text=html_content)
-# selenium_html_response = browser.page_source
-logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
+if __name__ == '__main__':
+    browser = open_browser()
+    go_to_page('https://breached.to')
+    go_to_page('https://breached.to/member?action=login')
+    username, password, my_post_key = load_credentials(CREDENTIALS)
+    html_content = selenium_page_source(browser)
+    scrapy_selector = Selector(text=html_content)
+    # selenium_html_response = browser.page_source
+    logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
+    xpath_login = '/html/body/div[1]/header/nav/div/ul/li[1]/a/@href'
+    xpath_register = '/html/body/div[1]/header/nav/div/ul/li[2]/a/@href'
 
-xpath_login = '/html/body/div[1]/header/nav/div/ul/li[1]/a/@href'
-xpath_register = '/html/body/div[1]/header/nav/div/ul/li[2]/a/@href'
+    logging.info(scrapy_selector.xpath(xpath_login).get())
+    logging.info(scrapy_selector.xpath(xpath_register).get())
 
-logging.info(scrapy_selector.xpath(xpath_login).get())
-logging.info(scrapy_selector.xpath(xpath_register).get())
+    goto_login_page(username, password, my_post_key)
+    logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 
-goto_login_page(username, password, my_post_key)
-logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
-
-go_to_page('https://breached.to/search')
-make_search()
-html_content = selenium_page_source(browser)
-scrapy_selector = Selector(text=html_content)
-get_path_all_threads(scrapy_selector)
-close_browser()
+    go_to_page('https://breached.to/search')
+    make_search()
+    html_content = selenium_page_source(browser)
+    scrapy_selector = Selector(text=html_content)
+    get_path_all_threads(scrapy_selector)
+    close_browser()

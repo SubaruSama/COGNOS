@@ -2,3 +2,5 @@ scrapy
 spacy
 scrapy-fake-useragent
 pytomlpp
+selenium
+# undetected-chromedriver
