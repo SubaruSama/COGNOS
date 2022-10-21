@@ -3,4 +3,8 @@ spacy
 scrapy-fake-useragent
 pytomlpp
 selenium
+<<<<<<< HEAD
 # undetected-chromedriver
+=======
+tbselenium
+>>>>>>> d823868 (Commitando arquivos para automatizar o TorBrowser)

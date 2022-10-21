@@ -177,6 +177,7 @@ doccano_spacy/
 # Credentials
 credentials.toml
 spiders_credentials/
+cred.toml
 
 # Notes
 anotações.txt
@@ -191,3 +192,6 @@ datasets
 
 # Exe stuff
 *.exe
+
+# ELF stuff
+tor-browser_en-US/

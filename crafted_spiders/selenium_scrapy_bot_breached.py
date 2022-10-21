@@ -1,8 +1,11 @@
 import uuid
 import logging
 import pytomlpp
+import tbselenium.common as cm
+from tbselenium.tbdriver import TorBrowserDriver
+from tbselenium.utils import launch_tbb_tor_with_stem
 from scrapy import Selector
-from selenium import webdriver
+# from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -25,9 +28,15 @@ def get_my_post_key() -> str:
     return browser.find_element(By.XPATH, '/html/body/div[1]/main/form/input[3]').get_attribute('value')
 
 def open_browser() -> WebDriver:
+<<<<<<< HEAD
 
     return webdriver.Chrome()
 
+=======
+	browser = TorBrowserDriver(tbb_dir, tor_cfg=cm.USE_STEM)
+	return browser
+    
+>>>>>>> d823868 (Commitando arquivos para automatizar o TorBrowser)
 def close_browser() -> None:
     browser.close()
 
@@ -50,12 +59,12 @@ def goto_login_page(username: str, password: str, post_key: str) -> None:
     login(username, password, post_key)
     check_login_sucessful()
 
-def check_login_sucessful():
+def check_login_sucessful() -> None:
     print('Login successful') if browser.find_element(By.CLASS_NAME, 'rf_noob') else print('Something went wrong on login')
 
-def go_to_page(url) -> None:
+def go_to_page(url: str) -> None:
     # Just a wrapper to get from selenium
-    browser.get(url)
+    browser.load_url(url, wait_for_page_body=True)
 
 def make_search() -> None:
     keyword = 'vulnerability'
@@ -106,6 +115,7 @@ def next_page_present() -> bool:
 
     return False
 
+<<<<<<< HEAD
 if __name__ == '__main__':
     browser = open_browser()
     go_to_page('https://breached.to')
@@ -117,6 +127,24 @@ if __name__ == '__main__':
     logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
     xpath_login = '/html/body/div[1]/header/nav/div/ul/li[1]/a/@href'
     xpath_register = '/html/body/div[1]/header/nav/div/ul/li[2]/a/@href'
+=======
+urls = {
+	'breached_login_hidden_service': 'http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion/login',
+	'check_tor': 'https://check.torproject.org/'
+}
+
+tbb_dir = "/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US"
+tor_process = launch_tbb_tor_with_stem(tbb_path=tbb_dir)
+
+browser = open_browser()
+go_to_page(urls.get('breached_login_hidden_service', 'URL not registered'))
+# go_to_page(check_tor)
+username, password, my_post_key = load_credentials(CREDENTIALS)
+html_content = selenium_page_source(browser)
+scrapy_selector = Selector(text=html_content)
+# selenium_html_response = browser.page_source
+logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
+>>>>>>> d823868 (Commitando arquivos para automatizar o TorBrowser)
 
     logging.info(scrapy_selector.xpath(xpath_login).get())
     logging.info(scrapy_selector.xpath(xpath_register).get())
