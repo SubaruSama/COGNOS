@@ -11,15 +11,20 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Dataclass_Breached
 
+<<<<<<< HEAD
 CREDENTIALS = 'spiders/cognos/spiders_credentials/credentials.toml'
 logging.basicConfig(level=logging.DEBUG)
+=======
+CREDENTIALS = './credentials.toml'
+# logging.basicConfig(level=logging.DEBUG)
+>>>>>>> ed8a24b (Adicionando as mudanças que fiz até agora. Por algum motivo não ta)
 
 def load_credentials(path: str) -> tuple:
     with open(path, 'r') as toml_file:
         contents = pytomlpp.load(toml_file)
 
-    username = contents["breachedto"]["username"]
-    password = contents["breachedto"]["password"]
+    username = contents['breachedto']['username']
+    password = contents['breachedto']['password']
     my_post_key = get_my_post_key()
 
     return username, password, my_post_key
