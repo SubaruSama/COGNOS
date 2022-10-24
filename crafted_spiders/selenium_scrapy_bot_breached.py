@@ -1,7 +1,9 @@
 import uuid
+import time
 import logging
 import pytomlpp
 import tbselenium.common as cm
+from stem.util import term
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
 from scrapy import Selector
@@ -12,22 +14,30 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Dataclass_Breached
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 CREDENTIALS = 'spiders/cognos/spiders_credentials/credentials.toml'
 logging.basicConfig(level=logging.DEBUG)
 =======
 CREDENTIALS = './credentials.toml'
 # logging.basicConfig(level=logging.DEBUG)
 >>>>>>> ed8a24b (Adicionando as mudanças que fiz até agora. Por algum motivo não ta)
+=======
+CREDENTIALS = '/home/user/Documents/COGNOS/crafted_spiders/cred.toml'
+logging.basicConfig(filename='log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s',level=logging.ERROR)
+>>>>>>> 1ae2906 (Agora está logando porém precisa confirmar o hCaptcha, adicionado um sleep de 1 minuto para isso)
 
-def load_credentials(path: str) -> tuple:
-    with open(path, 'r') as toml_file:
+def load_credentials(filename: str) -> tuple:
+    with open(filename, 'r') as toml_file:
         contents = pytomlpp.load(toml_file)
 
     username = contents['breachedto']['username']
     password = contents['breachedto']['password']
-    my_post_key = get_my_post_key()
+    # my_post_key = get_my_post_key()
 
-    return username, password, my_post_key
+    # logging.error(f'Credentials loaded: {username=}, {password=}, {my_post_key=}')
+
+    # return username, password, my_post_key
+    return username, password
 
 def get_my_post_key() -> str:
     return browser.find_element(By.XPATH, '/html/body/div[1]/main/form/input[3]').get_attribute('value')
@@ -40,23 +50,28 @@ def open_browser() -> WebDriver:
 =======
 	browser = TorBrowserDriver(tbb_dir, tor_cfg=cm.USE_STEM)
 	return browser
+<<<<<<< HEAD
     
 >>>>>>> d823868 (Commitando arquivos para automatizar o TorBrowser)
+=======
+
+>>>>>>> 1ae2906 (Agora está logando porém precisa confirmar o hCaptcha, adicionado um sleep de 1 minuto para isso)
 def close_browser() -> None:
     browser.close()
 
-def login(username: str, password: str, post_key: str) -> None:
+def login(username: str, password: str, post_key: str = '') -> None:
     username_field = browser.find_element(By.NAME, 'username')
     password_field = browser.find_element(By.NAME, 'password')
     login_button = browser.find_element(By.NAME, 'submit')
     username_field.send_keys(username)
     password_field.send_keys(password)
+    time.sleep(60)
     login_button.click()
 
 def selenium_page_source(browser: WebDriver) -> str:
     return browser.page_source
 
-def goto_login_page(username: str, password: str, post_key: str) -> None:
+def goto_login_page(username: str, password: str, post_key: str = '') -> None:
     # Find the login page and navigate to the page
     login_element = browser.find_element(By.CLASS_NAME, 'panel__module')
     login_element.click()
@@ -138,13 +153,16 @@ urls = {
 	'check_tor': 'https://check.torproject.org/'
 }
 
-tbb_dir = "/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US"
+tbb_dir = '/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US'
 tor_process = launch_tbb_tor_with_stem(tbb_path=tbb_dir)
 
 browser = open_browser()
+username, password = load_credentials(CREDENTIALS)
+# username, password, my_post_key = load_credentials(CREDENTIALS)
+print(term.format(f'{username=} {password=}', term.Color.GREEN))
 go_to_page(urls.get('breached_login_hidden_service', 'URL not registered'))
 # go_to_page(check_tor)
-username, password, my_post_key = load_credentials(CREDENTIALS)
+
 html_content = selenium_page_source(browser)
 scrapy_selector = Selector(text=html_content)
 # selenium_html_response = browser.page_source
@@ -157,9 +175,22 @@ logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
     goto_login_page(username, password, my_post_key)
     logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 
+<<<<<<< HEAD
     go_to_page('https://breached.to/search')
     make_search()
     html_content = selenium_page_source(browser)
     scrapy_selector = Selector(text=html_content)
     get_path_all_threads(scrapy_selector)
     close_browser()
+=======
+# goto_login_page(username, password, my_post_key)
+goto_login_page(username, password)
+logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
+
+go_to_page('https://breached.to/search')
+make_search()
+html_content = selenium_page_source(browser)
+scrapy_selector = Selector(text=html_content)
+get_path_all_threads(scrapy_selector)
+close_browser()
+>>>>>>> 1ae2906 (Agora está logando porém precisa confirmar o hCaptcha, adicionado um sleep de 1 minuto para isso)
