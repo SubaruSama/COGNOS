@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import uuid
 import time
 import logging
@@ -96,11 +98,15 @@ def make_search() -> None:
     search_button.click()
 
 def get_path_all_threads(html_content: Selector) -> list:
-    css_thread_post_pattern = 'tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(n)::attr(href)'
-    paths = html_content.css(css_thread_post_pattern).getall()
-
+    css_thread_post_pattern = 'tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)::attr(href)'
+    paths = html_content.css(css_thread_post_pattern).getall() 
+    # xpath_thread_post_pattern = '/html/body/div/main/table[2]/tbody/tr[*]/td[*]/div/span/a/@href'
+    # paths = html_content.xpath(xpath_thread_post_pattern).getall()
+    
+    print(paths[0:5])
+    
     for path in paths:
-        go_to_page(f'https://breached.to/{path}')
+        go_to_page(str(urls.get('breached_hidden_service_base', 'URL not registered')+ f'/{path}'))
         html_content = selenium_page_source(browser)
         extract_contents_from_posts(Selector(text=html_content))
 
@@ -149,6 +155,7 @@ if __name__ == '__main__':
     xpath_register = '/html/body/div[1]/header/nav/div/ul/li[2]/a/@href'
 =======
 urls = {
+	'breached_hidden_service_base': 'http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion',
 	'breached_login_hidden_service': 'http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion/login',
 	'check_tor': 'https://check.torproject.org/'
 }
@@ -187,7 +194,7 @@ logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 goto_login_page(username, password)
 logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 
-go_to_page('https://breached.to/search')
+go_to_page(urls.get('breached_hidden_service_base', 'URL not registered') + '/search')
 make_search()
 html_content = selenium_page_source(browser)
 scrapy_selector = Selector(text=html_content)
