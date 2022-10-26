@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/home/user/Documents/COGNOS/venv_cognos/bin/python3
 
 import uuid
 import time
@@ -17,6 +17,7 @@ from selenium_scrapy_bot_breached_dataclass import Selenium_Scrapy_Cognos_Datacl
 
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 CREDENTIALS = 'spiders/cognos/spiders_credentials/credentials.toml'
 logging.basicConfig(level=logging.DEBUG)
 =======
@@ -27,6 +28,28 @@ CREDENTIALS = './credentials.toml'
 CREDENTIALS = '/home/user/Documents/COGNOS/crafted_spiders/cred.toml'
 logging.basicConfig(filename='log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s',level=logging.ERROR)
 >>>>>>> 1ae2906 (Agora está logando porém precisa confirmar o hCaptcha, adicionado um sleep de 1 minuto para isso)
+=======
+# Config stuff, dont edit. I'll move to some conf files or make a database/API to store those infos
+CREDENTIALS = '/home/user/Documents/COGNOS/crafted_spiders/cred.toml'
+# logging.basicConfig(filename='stem_log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
+# logging.basicConfig(filename='scrapy_log.txt', filemode='w', level=logging.DEBUG)
+
+# Logger instance
+logger = logging.getLogger('scrapy_log')
+logger.setLevel(logging.DEBUG)
+
+# Handler
+scrapy_logger_handler = logging.FileHandler('scrapy_log.log')
+
+# Log format
+scrapy_formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+scrapy_logger_handler.setFormatter(scrapy_formatter)
+
+# Adding the handlers to the logger
+logger.addHandler(scrapy_logger_handler)
+
+# End config stuff
+>>>>>>> b6942d0 (Precisei logar os conteúdos no disco pq estava ficando difícil)
 
 def load_credentials(filename: str) -> tuple:
     with open(filename, 'r') as toml_file:
@@ -34,22 +57,26 @@ def load_credentials(filename: str) -> tuple:
 
     username = contents['breachedto']['username']
     password = contents['breachedto']['password']
-    # my_post_key = get_my_post_key()
 
-    # logging.error(f'Credentials loaded: {username=}, {password=}, {my_post_key=}')
-
-    # return username, password, my_post_key
     return username, password
 
+# Not needed
 def get_my_post_key() -> str:
-    return browser.find_element(By.XPATH, '/html/body/div[1]/main/form/input[3]').get_attribute('value')
+	return NotImplementedError
+    # return browser.find_element(By.XPATH, '/html/body/div[1]/main/form/input[3]').get_attribute('value')
 
 def open_browser() -> WebDriver:
+<<<<<<< HEAD
 <<<<<<< HEAD
 
     return webdriver.Chrome()
 
 =======
+=======
+	logger.debug('Opening tor browser...')
+	tbb_dir = '/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US'
+	tor_process = launch_tbb_tor_with_stem(tbb_path=tbb_dir)
+>>>>>>> b6942d0 (Precisei logar os conteúdos no disco pq estava ficando difícil)
 	browser = TorBrowserDriver(tbb_dir, tor_cfg=cm.USE_STEM)
 	return browser
 <<<<<<< HEAD
@@ -103,11 +130,10 @@ def get_path_all_threads(html_content: Selector) -> list:
     # xpath_thread_post_pattern = '/html/body/div/main/table[2]/tbody/tr[*]/td[*]/div/span/a/@href'
     # paths = html_content.xpath(xpath_thread_post_pattern).getall()
     
-    print(paths[0:5])
-    
     for path in paths:
         go_to_page(str(urls.get('breached_hidden_service_base', 'URL not registered')+ f'/{path}'))
         html_content = selenium_page_source(browser)
+        logger.debug(f'HTML content so far: {html_content}')
         extract_contents_from_posts(Selector(text=html_content))
 
 def extract_contents_from_posts(html_content: Selector) -> str:
@@ -160,21 +186,23 @@ urls = {
 	'check_tor': 'https://check.torproject.org/'
 }
 
-tbb_dir = '/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US'
-tor_process = launch_tbb_tor_with_stem(tbb_path=tbb_dir)
+logger.debug('Starting...')
 
 browser = open_browser()
 username, password = load_credentials(CREDENTIALS)
-# username, password, my_post_key = load_credentials(CREDENTIALS)
-print(term.format(f'{username=} {password=}', term.Color.GREEN))
 go_to_page(urls.get('breached_login_hidden_service', 'URL not registered'))
 # go_to_page(check_tor)
 
 html_content = selenium_page_source(browser)
 scrapy_selector = Selector(text=html_content)
+logger.debug(scrapy_selector)
 # selenium_html_response = browser.page_source
+<<<<<<< HEAD
 logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 >>>>>>> d823868 (Commitando arquivos para automatizar o TorBrowser)
+=======
+logger.debug(scrapy_selector.xpath('/html/head/title/text()').get())
+>>>>>>> b6942d0 (Precisei logar os conteúdos no disco pq estava ficando difícil)
 
     logging.info(scrapy_selector.xpath(xpath_login).get())
     logging.info(scrapy_selector.xpath(xpath_register).get())
@@ -182,6 +210,7 @@ logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
     goto_login_page(username, password, my_post_key)
     logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     go_to_page('https://breached.to/search')
     make_search()
@@ -191,6 +220,8 @@ logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
     close_browser()
 =======
 # goto_login_page(username, password, my_post_key)
+=======
+>>>>>>> b6942d0 (Precisei logar os conteúdos no disco pq estava ficando difícil)
 goto_login_page(username, password)
 logging.info(scrapy_selector.xpath('/html/head/title/text()').get())
 
