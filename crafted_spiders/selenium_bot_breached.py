@@ -93,10 +93,12 @@ def make_search() -> None:
 
 def get_path_all_threads(html_content) -> list:
     css_thread_post_pattern = 'tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)'
-    paths = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern)
-    logger.debug(f'Paths: {p.text for p in paths}')
+    css_elements = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern)
+    paths = [elem.get_attribute('href') for elem in css_elements]
+    logger.debug(f'Paths position 1: {paths[0]}')
+    logger.debug(f'Paths position 3: {paths[2]}')
+    logger.debug(f'Paths position 5: {paths[4]}')
     # paths = html_content.css(css_thread_post_pattern).getall()
-    logger.debug(f'Paths: {paths}')
     # xpath_thread_post_pattern = '/html/body/div/main/table[2]/tbody/tr[*]/td[*]/div/span/a/@href'
     # paths = html_content.xpath(xpath_thread_post_pattern).getall()
     
