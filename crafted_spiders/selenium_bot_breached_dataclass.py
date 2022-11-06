@@ -18,18 +18,29 @@ class Selenium_Cognos_Dataclass_Breached:
     post_interatcion: str
     url: str
 
-	def __str__(self) -> str:
-		return(
-			"uuid: {self.uuid}",
-			"username: {self.username}",
-			"posts_quantity: {self.posts_quantity}",
-			"date_joined: {self.date_joined}",
-			"reputation: {self.reputation}",
-			"info_date_post: {self.info_date_post}",
-			"post_content: {self.post_content}",
-			"title: {self.title}",
-			"post_interaction: {self.post_interaction}",
-			"url: {self.url}"
-		)
+    def __str__(self) -> str:
+        return(
+            "uuid: {self.uuid}",
+            "username: {self.username}",
+            "posts_quantity: {self.posts_quantity}",
+            "date_joined: {self.date_joined}",
+            "reputation: {self.reputation}",
+            "info_date_post: {self.info_date_post}",
+            "post_content: {self.post_content}",
+            "title: {self.title}",
+            "post_interaction: {self.post_interaction}",
+            "url: {self.url}"
+        )
 
-	
+    def as_dict(self) -> Dict[str, str]:
+        return {
+            'uuid': self.uuid,
+            'username': self.username,
+            'posts_quantity': self.posts_quantity,
+            'date_joind': self.date_joined,
+            'reputation': self.reputation,
+            'info_date_post': self.info_date_post,
+            'title': self.title,
+            'post_content': self.post_content,
+            'url': self.url
+        }
