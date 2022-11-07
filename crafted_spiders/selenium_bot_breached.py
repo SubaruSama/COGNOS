@@ -137,10 +137,9 @@ def extract_contents_from_posts(html_content: str) -> str:
     logger.debug(f'Title from browser: {xpath_title.text}')
 
     logger.debug(f'Content received from get_path_all_threads: {html_content[0:100]}')
-    logger.debug('Instantiating dataclass...')
 
+    logger.debug('Instantiating dataclass...')
     item = Selenium_Cognos_Dataclass_Breached()
-    item.username = 'John Doe'
 
     item.title = browser.find_element(
         By.XPATH,
@@ -148,16 +147,26 @@ def extract_contents_from_posts(html_content: str) -> str:
     ).text
     logger.debug(item.title)
 
-    item.username = 'username path here'
+    item.username = browser.find_elements(
+        By.XPATH,
+        '//*[@id="posts"]/div[*]/div[1]/div[1]/div[1]/div/a/span'
+    ).text
     logger.debug(item.username)
-    
-    item.info_date_post = 'info_date_post path here'
+
+    item.info_date_post = browser.find_elements(
+        By.XPATH,
+        '//*[@id="posts"]/div[*]/div[2]/div[1]/div[1]/span'
+    ).text
     logger.debug(item.info_date_post)
 
-    item.post_content = 'post_content path here'
+    item.post_content = browser.find_elements(
+        By.XPATH,
+        '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+    ).text
     logger.debug(item.post_content)
     
     item.url = 'url path here'
+    item.url = browser.current_url
     logger.debug(item.url)
 
     logger.debug(f'{item.__dict__}')
