@@ -156,44 +156,43 @@ def extract_contents_from_posts(html_content: str) -> str:
 
     for post in posts:
         try:
-            item.username = post.find_element(
-            By.XPATH,
-            '/div[*]/div[1]/div[1]/div[1]/div[1]/a/span'
-            ).text
-            logger.debug(item.username)
+            usernames = post.find_elements(
+                By.XPATH,
+                '//*[@id="posts"]/div[*]/div[1]/div[1]/div[1]/div[1]/a/span'
+                )
+            item.username = [username.text for username in usernames]
 
-            item.info_date_post = post.find_element(
-            By.XPATH,
-            '/div[*]/div[2]/div[1]/div[1]/span'
-            ).text
-            logger.debug(item.info_date_post)
+            info_date_posts = post.find_elements(
+                By.XPATH,
+                '//*[@id="posts"]/div[*]/div[2]/div[1]/div[1]/span'
+                )
+            item.info_date_post = [date_post.text for date_post in info_date_posts]
 
-            item.post_content = post.find_element(
-            By.XPATH,
-            '/div[*]/div[2]/div[1]/div[2]'
-            ).text
-            logger.debug(item.post_content)
-        
+            post_contents = post.find_elements(
+                By.XPATH,
+                '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+                )
+            item.post_content = [content.text for content in post_contents]
+
             item.url = browser.current_url
-            logger.debug(item.url)
 
         except NoSuchElementException as e:
             logger.debug('Exception ocurred!')
             logger.debug(f'Message: {e.msg}')
             logger.debug(f'Stacktrace: {e.stacktrace}')
 
-    logger.debug(f'{item.__dict__}')
+        finally:
+            logger.debug(f'{item.__dict__}')
+            save_to_json(
+                file_name='scrape_result',
+                file_extension='.json',
+                item=item.__dict__,
+                file_path='../../'
+            )
 
-    save_to_json(
-        file_name='scrape_result',
-        file_extension='.json',
-        item=item.__dict__,
-        file_path='../../'
-    )
-
-    if next_page_present():
-        click_next_page()
-        extract_contents_from_posts(html_content)
+        if next_page_present():
+            click_next_page()
+            extract_contents_from_posts(html_content)
 
 def save_to_json(
     file_name: str,
