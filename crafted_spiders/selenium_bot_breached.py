@@ -152,11 +152,13 @@ def extract_contents_from_posts(html_content: str) -> str:
         '//*[@id="posts"]'
     )
 
+    logger.debug(f'{[post.text for post in posts]}')
+
     for post in posts:
         try:
             item.username = post.find_element(
             By.XPATH,
-            '/div[*]/div[1]/div[1]/div[1]/div/a/span'
+            '/div[*]/div[1]/div[1]/div[1]/div[1]/a/span'
             ).text
             logger.debug(item.username)
 
@@ -208,6 +210,8 @@ def save_to_json(
             encoding ='utf8'
         )
     else:
+        if file_path[-1] == '/':
+            file_path = file_path[:-1] # Dirty hack
         outfile = open(
             f'{file_path}/{file_name}{file_extension}',
             mode='a+',
