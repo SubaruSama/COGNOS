@@ -6,6 +6,7 @@ import json
 import signal
 import logging
 import pytomlpp
+from typing import Iterable
 import tbselenium.common as cm
 from stem.util import term
 from tbselenium.tbdriver import TorBrowserDriver
@@ -18,24 +19,25 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium_bot_breached_dataclass import Selenium_Cognos_Dataclass_Breached
 
+
 # Config stuff, dont edit. I'll move to some conf files or make a database/API to store those infos
 CREDENTIALS = '/home/user/Documents/COGNOS/crafted_spiders/cred.toml'
 # logging.basicConfig(filename='stem_log.txt', filemode='w', format='%(name)s - %(levelname)s - %(message)s', level=logging.INFO)
 # logging.basicConfig(filename='scrapy_log.txt', filemode='w', level=logging.DEBUG)
 
 # Logger instance
-logger = logging.getLogger('scrapy_log')
+logger = logging.getLogger('selenium_log')
 logger.setLevel(logging.DEBUG)
 
 # Handler
-scrapy_logger_handler = logging.FileHandler('scrapy_log.log')
+selenium_logger_handler = logging.FileHandler('selenium_log.log')
 
 # Log format
-scrapy_formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-scrapy_logger_handler.setFormatter(scrapy_formatter)
+selenium_formatter = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
+selenium_logger_handler.setFormatter(selenium_formatter)
 
 # Adding the handlers to the logger
-logger.addHandler(scrapy_logger_handler)
+logger.addHandler(selenium_logger_handler)
 
 # End config stuff
 
@@ -91,8 +93,8 @@ def check_login_sucessful() -> None:
             logger.debug('Login successful')
     except NoSuchElementException as e:
         logger.debug('Exception ocurred!')
-        logger.debug('Message: {e.message}')
-        logger.debug('Stacktrace: {e.stacktrace}')
+        logger.debug(f'Message: {e.msg}')
+        logger.debug(f'Stacktrace: {e.stacktrace}')
     # print('Login successful') if browser.find_element(By.CLASS_NAME, 'rf_noob') else print('Something went wrong on login')
 
 def go_to_page(url: str) -> None:
@@ -112,9 +114,9 @@ def get_path_all_threads(html_content) -> list:
     css_thread_post_pattern = 'tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)'
     css_elements = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern)
     paths = [elem.get_attribute('href') for elem in css_elements]
-    logger.debug(f'Paths position 1: {paths[0]}')
-    logger.debug(f'Paths position 3: {paths[2]}')
-    logger.debug(f'Paths position 5: {paths[4]}')
+    # logger.debug(f'Paths position 1: {paths[0]}')
+    # logger.debug(f'Paths position 3: {paths[2]}')
+    # logger.debug(f'Paths position 5: {paths[4]}')
     # paths = html_content.css(css_thread_post_pattern).getall()
     # xpath_thread_post_pattern = '/html/body/div/main/table[2]/tbody/tr[*]/td[*]/div/span/a/@href'
     # paths = html_content.xpath(xpath_thread_post_pattern).getall()
@@ -129,30 +131,64 @@ def get_path_all_threads(html_content) -> list:
 def extract_contents_from_posts(html_content: str) -> str:
     logger.debug(f'Type of html_content: {type(html_content)}')
 
-    xpath_title = browser.find_element(By.XPATH, '/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span')
-    logger.debug(f'Title from browser: {xpath_title}')
+    xpath_title = browser.find_element(
+        By.XPATH,
+        '/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span'
+    )
+    logger.debug(f'Title from browser: {xpath_title.text}')
 
     logger.debug(f'Content received from get_path_all_threads: {html_content[0:100]}')
+    logger.debug('Instantiating dataclass...')
 
     item = Selenium_Cognos_Dataclass_Breached()
-    item.uuid(uuid.uuid4())
-    logger.debug(item.uuid)
-    item.title(html_content.xpath('/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span/text()').get())
-    logger.debug(item.title)
-    item.username('username path here')
-    item.info_date_post('info_date_post path here')
-    item.post_content('post_content path here')
-    item.url('url path here')
-    logging.info(html_content.xpath('/html/head/title/text()').get())
-    save_to_json('.', 'scrape_result', '.json', item)
-	
-	if next_page_present():
-		click_next_page()
-		extract_contents_from_posts(html_content)
+    item.username = 'John Doe'
 
-def save_to_json(file_path: str, file_name: str, file_extension: str, item: Iterable[Selenium_Cognos_Dataclass_Breached])-> None:
-    with file_path.open('w') as file:
-        file.write(item.as_dict())
+    item.title = browser.find_element(
+        By.XPATH,
+        '/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span'
+    ).text
+    logger.debug(item.title)
+
+    item.username = 'username path here'
+    logger.debug(item.username)
+    
+    item.info_date_post = 'info_date_post path here'
+    logger.debug(item.info_date_post)
+
+    item.post_content = 'post_content path here'
+    logger.debug(item.post_content)
+    
+    item.url = 'url path here'
+    logger.debug(item.url)
+
+    logger.debug(f'{item.__dict__}')
+
+    save_to_json('.', 'scrape_result', '.json', item.__dict__)
+
+    if next_page_present():
+        click_next_page()
+        extract_contents_from_posts(html_content)
+
+def save_to_json(
+    file_path: str,
+    file_name: str,
+    file_extension: str,
+    item: Iterable[Selenium_Cognos_Dataclass_Breached]
+    ) -> None:
+
+    outfile = open(
+        f'{file_name}{file_extension}',
+        mode='a+',
+        encoding ='utf8'
+    )
+
+    try:
+        json.dump(item, outfile, indent=4)
+        # json.dump(item.as_dict(), outfile, indent=4)
+    except:
+        logger.debug('Something went wrong')
+    finally:
+        outfile.close()
 
 def click_next_page() -> None:
     next_page_button = browser.find_element(By.CLASS_NAME, 'pagination_next')

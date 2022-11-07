@@ -1,36 +1,22 @@
 import uuid
 from datetime import date
-from typing import List
+from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 
 @dataclass
 class Selenium_Cognos_Dataclass_Breached:
-    uuid: uuid.uuid4() 
-    username: str
-    posts_quantity: int
-    date_joined: date
-    reputation: int
-    info_date_post: str
-    post_content: List[str]
-    is_admin: bool # For future use
-    is_special_user: bool # For future use
-    title: str
-    post_interatcion: str
-    url: str
-
-    def __str__(self) -> str:
-        return(
-            "uuid: {self.uuid}",
-            "username: {self.username}",
-            "posts_quantity: {self.posts_quantity}",
-            "date_joined: {self.date_joined}",
-            "reputation: {self.reputation}",
-            "info_date_post: {self.info_date_post}",
-            "post_content: {self.post_content}",
-            "title: {self.title}",
-            "post_interaction: {self.post_interaction}",
-            "url: {self.url}"
-        )
+    # uuid: Union[str, uuid.UUID] # For future use
+    username: Optional[str] = None
+    posts_quantity: Optional[int] = None
+    date_joined: Optional[date] = None
+    reputation: Optional[int] = None
+    info_date_post: Optional[str] = None
+    post_content: Optional[List[str]] = None
+    # is_admin: Optional[bool] = None # For future use
+    # is_special_user: Optional[bool] = None # For future use
+    title: Optional[str] = None
+    post_interatcion: Optional[str] = None
+    url: Optional[str] = None
 
     def as_dict(self) -> Dict[str, str]:
         return {
