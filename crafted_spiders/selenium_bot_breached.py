@@ -1,17 +1,16 @@
 #!/home/user/Documents/COGNOS/venv_cognos/bin/python3
 
+import os
 import uuid
 import time
 import json
 import signal
 import logging
 import pytomlpp
-from typing import Iterable
 import tbselenium.common as cm
 from stem.util import term
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
-# from scrapy import Selector
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
@@ -163,24 +162,39 @@ def extract_contents_from_posts(html_content: str) -> str:
 
     logger.debug(f'{item.__dict__}')
 
-    save_to_json('.', 'scrape_result', '.json', item.__dict__)
+    save_to_json(
+        file_name='scrape_result',
+        file_extension='.json',
+        item=item.__dict__,
+        file_path='../../'
+    )
 
     if next_page_present():
         click_next_page()
         extract_contents_from_posts(html_content)
 
 def save_to_json(
-    file_path: str,
     file_name: str,
     file_extension: str,
-    item: Iterable[Selenium_Cognos_Dataclass_Breached]
+    item: dict[str, any],
+    file_path: str = None
     ) -> None:
 
-    outfile = open(
-        f'{file_name}{file_extension}',
-        mode='a+',
-        encoding ='utf8'
-    )
+    logger.debug('Creating the json of results...')
+    if file_path is None:
+        outfile = open(
+            f'{file_name}{file_extension}',
+            mode='a+',
+            encoding ='utf8'
+        )
+    else:
+        outfile = open(
+            f'{file_path}/{file_name}{file_extension}',
+            mode='a+',
+            encoding ='utf8'
+        )
+    logger.debug(f'Created json of results: {outfile.name}')
+    logger.debug(f'Path of the json: {os.path.realpath(outfile.name)}')
 
     try:
         json.dump(item, outfile, indent=4)
@@ -191,14 +205,25 @@ def save_to_json(
         outfile.close()
 
 def click_next_page() -> None:
-    next_page_button = browser.find_element(By.CLASS_NAME, 'pagination_next')
+    next_page_button = browser.find_element(
+        By.CLASS_NAME,
+        'pagination_next'
+    )
     next_page_button.click()
 
 def next_page_present() -> bool:
-    xpath_next_page_pattern = '/html//a[@class = "pagination_next"]/@href'
-    xpath_next_page = Selector.xpath(xpath_next_page_pattern).get()
+    xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
+    try:
+        next_page_button_present = browser.find_element(
+            By.XPATH,
+            xpath_next_page_pattern
+        )
+    except NoSuchElementException as e:
+        logger.debug('Exception ocurred!')
+        logger.debug(f'Message: {e.msg}')
+        logger.debug(f'Stacktrace: {e.stacktrace}')
 
-    if xpath_next_page is not None:
+    if next_page_button_present is not None:
         return True
 
     return False
