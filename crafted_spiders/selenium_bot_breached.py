@@ -147,27 +147,38 @@ def extract_contents_from_posts(html_content: str) -> str:
     ).text
     logger.debug(item.title)
 
-    item.username = browser.find_elements(
+    posts = browser.find_elements(
         By.XPATH,
-        '//*[@id="posts"]/div[*]/div[1]/div[1]/div[1]/div/a/span'
-    ).text
-    logger.debug(item.username)
+        '//*[@id="posts"]'
+    )
 
-    item.info_date_post = browser.find_elements(
-        By.XPATH,
-        '//*[@id="posts"]/div[*]/div[2]/div[1]/div[1]/span'
-    ).text
-    logger.debug(item.info_date_post)
+    for post in posts:
+        try:
+            item.username = post.find_element(
+            By.XPATH,
+            '/div[*]/div[1]/div[1]/div[1]/div/a/span'
+            ).text
+            logger.debug(item.username)
 
-    item.post_content = browser.find_elements(
-        By.XPATH,
-        '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
-    ).text
-    logger.debug(item.post_content)
-    
-    item.url = 'url path here'
-    item.url = browser.current_url
-    logger.debug(item.url)
+            item.info_date_post = post.find_element(
+            By.XPATH,
+            '/div[*]/div[2]/div[1]/div[1]/span'
+            ).text
+            logger.debug(item.info_date_post)
+
+            item.post_content = post.find_element(
+            By.XPATH,
+            '/div[*]/div[2]/div[1]/div[2]'
+            ).text
+            logger.debug(item.post_content)
+        
+            item.url = browser.current_url
+            logger.debug(item.url)
+
+        except NoSuchElementException as e:
+            logger.debug('Exception ocurred!')
+            logger.debug(f'Message: {e.msg}')
+            logger.debug(f'Stacktrace: {e.stacktrace}')
 
     logger.debug(f'{item.__dict__}')
 
