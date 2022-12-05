@@ -5,7 +5,6 @@ import logging
 import os
 import sys
 import time
-from dataclasses import asdict
 
 import pytomlpp
 import tbselenium.common as cm
@@ -13,6 +12,10 @@ import tbselenium.common as cm
 # from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
+
+# For problemas when some object is not loaded
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 # from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.remote.webdriver import WebDriver
@@ -166,12 +169,20 @@ def extract_contents_from_posts(html_content: str) -> str:
     posts = browser.find_elements(By.XPATH, '//*[@id="posts"]')
     logger.debug(f"{[post.text for post in posts]}")
 
-    for post in posts:
+    for _ in posts:
+    # for post in posts:
         try:
 
-            post_contents = post.find_elements(
-                By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+            post_contents = WebDriverWait(browser, 10).until(
+                EC.presence_of_all_elements_located(
+                    (By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]')
+                )
             )
+
+            # post.find_elements(
+            #     By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+            # )
+
             post_content = [content.text for content in post_contents]
 
         except NoSuchElementException as e:
@@ -180,8 +191,12 @@ def extract_contents_from_posts(html_content: str) -> str:
             logger.debug(f"Stacktrace: {e.stacktrace}")
 
         finally:
-            logger.debug(f"{asdict(post_content)}")
-            write_to_file(asdict(post_content))
+            logger.debug(f"{post_content}")
+            write_to_file(
+                post_content,
+                filename="scraped_results",
+                file_path="../../",
+            )
 
             # TODO: not fow now. later
             # save_to_json(
@@ -250,10 +265,13 @@ def extract_contents_from_posts(html_content: str) -> str:
     #         extract_contents_from_posts(html_content)
 
 
-def write_to_file(item: list) -> None:
-    with open("scraped_results.txt", mode="a+") as scraped_results:
+def write_to_file(
+    item: list, filename: str, file_extension: str = ".txt", file_path: str = "."
+) -> None:
+    with open(f"{file_path}{filename}{file_extension}", mode="a+") as scraped_results:
         if scraped_results.writable():
-            scraped_results.write(item)
+            for i in item:
+                scraped_results.write(i)
 
 
 # TODO: preciso salvar corretamente no formato JSON, no momento está salvando todo errado
