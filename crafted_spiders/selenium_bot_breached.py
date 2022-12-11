@@ -151,7 +151,6 @@ def get_path_all_threads(html_content) -> list:
 
 
 def extract_contents_from_posts(html_content: str) -> str:
-    post_content = []
     logger.debug(f"Type of html_content: {type(html_content)}")
 
     xpath_title = browser.find_element(
@@ -171,44 +170,66 @@ def extract_contents_from_posts(html_content: str) -> str:
 
     for _ in posts:
     # for post in posts:
-        try:
-
-            post_contents = WebDriverWait(browser, 10).until(
-                EC.presence_of_all_elements_located(
-                    (By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]')
-                )
+        post_contents = WebDriverWait(browser, 10).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]')
             )
+        )
 
-            # post.find_elements(
-            #     By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
-            # )
+        post_content = [content.text for content in post_contents]
+        logger.debug(f"{post_content}")
+        write_to_file(
+            post_content,
+            filename="scraped_results",
+            file_path="../../"
+        )
 
-            post_content = [content.text for content in post_contents]
-
-        except NoSuchElementException as e:
-            logger.debug("Exception ocurred!")
-            logger.debug(f"Message: {e.msg}")
-            logger.debug(f"Stacktrace: {e.stacktrace}")
-
-        finally:
-            logger.debug(f"{post_content}")
-            write_to_file(
-                post_content,
-                filename="scraped_results",
-                file_path="../../",
-            )
-
-            # TODO: not fow now. later
-            # save_to_json(
-            #     file_name="scrape_result",
-            #     file_extension=".json",
-            #     item=asdict(item),
-            #     file_path="../../",
-            # )
-
-        if next_page_present():
+        next_page_exists = next_page_present()
+        if next_page_exists:
             click_next_page()
             extract_contents_from_posts(html_content)
+        else:
+            get_path_all_threads()
+
+        # try:
+
+        #     post_contents = WebDriverWait(browser, 10).until(
+        #         EC.presence_of_all_elements_located(
+        #             (By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]')
+        #         )
+        #     )
+
+        #     # post.find_elements(
+        #     #     By.XPATH, '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+        #     # )
+
+        #     post_content = [content.text for content in post_contents]
+
+        # except NoSuchElementException as e:
+        #     logger.debug("Exception ocurred!")
+        #     logger.debug(f"Message: {e.msg}")
+        #     logger.debug(f"Stacktrace: {e.stacktrace}")
+
+        # finally:
+        #     logger.debug(f"{post_content}")
+        #     write_to_file(
+        #         post_content,
+        #         filename="scraped_results",
+        #         file_path="../../",
+        #     )
+
+        #     # TODO: not fow now. later
+        #     # save_to_json(
+        #     #     file_name="scrape_result",
+        #     #     file_extension=".json",
+        #     #     item=asdict(item),
+        #     #     file_path="../../",
+        #     # )
+
+        # next_page_exists = next_page_present()
+        # if next_page_exists:
+        #     click_next_page()
+        #     extract_contents_from_posts(html_content)
 
     # TODO: i need to simplify the write on disk. No need, for now, to serialize the data
     # in json or other format. For now, only the interesting part is the text.
