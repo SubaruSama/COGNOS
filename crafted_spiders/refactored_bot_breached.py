@@ -27,9 +27,15 @@ from tbselenium.utils import launch_tbb_tor_with_stem
 class BreachedSpider:
     def __init__(
         self,
+        filename: str,
+        filepath: str,
+        file_extension: str,
         tbb_dir: str = "/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US",
     ) -> None:
         self.tbb_dir = tbb_dir
+        self.filename = filename
+        self.filepath = filepath
+        self.file_extension = file_extension
 
     def setup_logging(self) -> None:
         logger = logging.getLogger("selenium_log")
@@ -67,7 +73,8 @@ class BreachedSpider:
     def check_login_succesful(self) -> None:
         pass
 
-    def get_page_source(self, browser: WebDriver) -> str:
+    @staticmethod
+    def get_page_source(browser: WebDriver) -> str:
         return browser.page_source
 
     def go_to_page(self, url: str) -> None:
@@ -93,7 +100,8 @@ class BreachedSpider:
     def go_to_next_page(self) -> None:
         pass
 
-    def write_to_file(self, filename, filepath, file_extension) -> None:
+    @staticmethod
+    def write_to_file(filename, filepath, file_extension) -> None:
         pass
 
     def scrape(self):
@@ -121,16 +129,37 @@ class BreachedSpider:
         self.login()
         self.make_search()
 
-        # Paths of threads that contain the posts
+        # Collect all the paths from all threads
         paths = self.get_path_all_threads()
-        scraping_done = False
-
-        while scraping_done is not True:
+        all_paths_gathered = False
+        while all_paths_gathered is not True:
             for path in paths:
-                self.enter_thread(path)
+                # 1. Collect the path from each thread
+                # 2. Check if next page exists
+                next_page_present = self.next_page_present()
+                if next_page_present:
+                    self.go_to_next_page()
+                #   2.1 If yes, go to the next page
+                #   2.2 If no, start scraping the threads
+                pass
+            else:
+                # Scrape the posts, call the method for it
+                all_paths_gathered = True
+
+        # With the list of all threads, enter each thread and collect
+        # the posts
+        scraping_done = False
+        urls_from_threads = paths
+        while scraping_done is not True:
+            for url in urls_from_threads:
+                self.enter_thread(url)
                 post_contents = self.extract_contents_from_posts(html_content)
-                self.write_to_file(post_contents)
+                BreachedSpider.write_to_file(post_contents)
                 next_page_exists = self.next_page_present()
                 if next_page_exists:
                     self.go_to_next_page()
                     continue
+
+
+spider = BreachedSpider("scraped_results", "../../", ".txt")
+spider.scrape()
