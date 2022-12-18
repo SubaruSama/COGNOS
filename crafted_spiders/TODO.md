@@ -1,6 +1,11 @@
 ### Need to implement
-- [ ] Implement the methods for setup logging
+- [X] Implement the methods for setup logging
 - [ ] Implement the methods for browser setup
+    - [ ] Load credentials
+    - [ ] Login and check
+    - [ ] Make search
+    - [ ] Go to page (browser.load_url(url, wait_for_page_body=True))
+    - [ ] Return the source of the page (browser.page_source)
 - [ ] Implement the methods for collect the paths from all the threads
 - [ ] Implement the methods to scrape the posts of threads collected
 - [ ] Implement the write to file the results

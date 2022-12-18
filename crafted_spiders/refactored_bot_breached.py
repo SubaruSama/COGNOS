@@ -11,7 +11,7 @@ import tbselenium.common as cm
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 
-# For problemas when some object is not loaded
+# For problems when some object is not loaded
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -25,17 +25,19 @@ from tbselenium.utils import launch_tbb_tor_with_stem
 
 
 class BreachedSpider:
+
     def __init__(
         self,
         filename: str,
         filepath: str,
-        file_extension: str,
+        file_extension: str = ".txt",
         tbb_dir: str = "/home/user/Documents/COGNOS/crafted_spiders/tor-browser_en-US",
     ) -> None:
         self.tbb_dir = tbb_dir
         self.filename = filename
         self.filepath = filepath
         self.file_extension = file_extension
+        self.logger = self.get_logger()
 
     def setup_logging(self) -> None:
         logger = logging.getLogger("selenium_log")
@@ -49,17 +51,23 @@ class BreachedSpider:
         return self.setup_logging().logger
 
     def setup_browser(self) -> WebDriver:
-        pass
+        try:
+            self.logger.debug("Opening tor browser...")
+            tor_process = launch_tbb_tor_with_stem(tbb_path=self.tbb_dir)
+            browser = TorBrowserDriver(self.tbb_dir, tor_cfg=cm.USEM_STEM)
+
+            return browser
+        except OSError as e:
+            self.logger.debug(f"Something went wrong: {e}")
 
     def get_browser(self) -> WebDriver:
         # 1 setup_browser
-        self.setup_browser()
+        # self.setup_browser()
         # 2 self
-        return browser
-        pass
+        return self.setup_browser().browser
 
     def close_browser(self) -> None:
-        pass
+        self.browser.quit()
 
     def load_credentials(self, filename: str) -> tuple:
         pass
@@ -73,11 +81,11 @@ class BreachedSpider:
     def check_login_succesful(self) -> None:
         pass
 
-    @staticmethod
-    def get_page_source(browser: WebDriver) -> str:
+    @classmethod
+    def get_page_source(cls, browser: WebDriver) -> str:
         return browser.page_source
 
-    def go_to_page(self, url: str) -> None:
+    def go_to_page(self, browser: WebDriver, url: str) -> None:
         browser.load_url(url, wait_for_page_body=True)
 
     def make_search(self) -> None:
@@ -100,8 +108,8 @@ class BreachedSpider:
     def go_to_next_page(self) -> None:
         pass
 
-    @staticmethod
-    def write_to_file(filename, filepath, file_extension) -> None:
+    @classmethod
+    def write_to_file(cls, filename, filepath, file_extension) -> None:
         pass
 
     def scrape(self):
@@ -148,9 +156,9 @@ class BreachedSpider:
 
         # With the list of all threads, enter each thread and collect
         # the posts
-        scraping_done = False
+        is_scraping_done = False
         urls_from_threads = paths
-        while scraping_done is not True:
+        while is_scraping_done is not True:
             for url in urls_from_threads:
                 self.enter_thread(url)
                 post_contents = self.extract_contents_from_posts(html_content)
@@ -159,7 +167,11 @@ class BreachedSpider:
                 if next_page_exists:
                     self.go_to_next_page()
                     continue
+            else:
+                is_scraping_done = True
+
+        self.close_browser()
 
 
-spider = BreachedSpider("scraped_results", "../../", ".txt")
+spider = BreachedSpider("scraped_results", "../../")
 spider.scrape()
