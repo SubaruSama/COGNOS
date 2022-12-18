@@ -24,9 +24,14 @@ from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
 
 CREDENTIALS_PATH = "/home/user/Documents/COGNOS/crafted_spiders/cred.toml"
+urls = {
+    "breached_hidden_service_base": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion",
+    "breached_login_hidden_service": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion/login",
+    "check_tor": "https://check.torproject.org/",
+}
+
 
 class BreachedSpider:
-
     def __init__(
         self,
         filename: str,
@@ -79,16 +84,35 @@ class BreachedSpider:
 
         return username, password
 
-    def login(self, username: str, password: str) -> None:
-        # 1 load_credentials
+    def login(
+        self, username: str, password: str, browser: WebDriver
+    ) -> None:
+        # 1 go to login page
         # 2 login
+        username_field = browser.find_element(By.NAME, "username")
+        password_field = browser.find_element(By.NAME, "password")
+        login_button = browser.find_element(By.NAME, "submit")
+        username_field.send_keys(username)
+        password_field.send_keys(password)
+        time.sleep(30)
+        login_button.click()
         # 3 check_login_succesul
-        pass
+        if self.check_login_succesful(browser) == False:
+            self.logger.debug("Oops, something went wrong")
+            self.close_browser()
 
-    def check_login_succesful(self) -> None:
-        pass
+    def check_login_succesful(self, browser: WebDriver) -> bool:
+        try:
+            if browser.find_element(By.CLASS_NAME, "rf_noob"):
+                self.logger.debug("Login successul")
+                return True
+        except NoSuchElementException as e:
+            self.logger.debug("Exception ocurred!")
+            self.logger.debug(f"Message: {e.msg}")
+            self.logger.debug(f"Stacktrace: {e.stacktrace}")
+            return False
 
-    def load_cookise(cookie_file: str) -> None:
+    def load_cookies(cookie_file: str) -> None:
         pass
 
     def unpickle_cookie(cookie: str):
@@ -146,8 +170,15 @@ class BreachedSpider:
         browser = self.get_browser()
         logger.debug("Brownser opened.")
 
-        self.go_to_page("login page")
-        self.login()
+        self.logger.debug(f'Going to the page {urls.get("breached_login_hidden_service")}')
+        self.go_to_page(urls.get("breached_login_hidden_service"))
+        self.logger.debug("Loading credentials...")
+        username, password = self.load_credentials(CREDENTIALS_PATH)
+        self.login(
+            username, password, browser
+        )
+
+
         self.make_search()
 
         # Collect all the paths from all threads
