@@ -23,6 +23,7 @@ from selenium_bot_breached_dataclass import Selenium_Cognos_Dataclass_Breached
 from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
 
+CREDENTIALS_PATH = "/home/user/Documents/COGNOS/crafted_spiders/cred.toml"
 
 class BreachedSpider:
 
@@ -70,7 +71,13 @@ class BreachedSpider:
         self.browser.quit()
 
     def load_credentials(self, filename: str) -> tuple:
-        pass
+        with open(filename, "r") as toml_file:
+            contents = pytomlpp.load(toml_file)
+
+        username = contents["breachedto"]["username"]
+        password = contents["breachedto"]["password"]
+
+        return username, password
 
     def login(self, username: str, password: str) -> None:
         # 1 load_credentials
@@ -79,6 +86,12 @@ class BreachedSpider:
         pass
 
     def check_login_succesful(self) -> None:
+        pass
+
+    def load_cookise(cookie_file: str) -> None:
+        pass
+
+    def unpickle_cookie(cookie: str):
         pass
 
     @classmethod

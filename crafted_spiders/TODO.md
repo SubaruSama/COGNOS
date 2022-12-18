@@ -1,7 +1,7 @@
 ### Need to implement
 - [X] Implement the methods for setup logging
 - [ ] Implement the methods for browser setup
-    - [ ] Load credentials
+    - [X] Load credentials
     - [ ] Login and check
     - [ ] Make search
     - [ ] Go to page (browser.load_url(url, wait_for_page_body=True))
