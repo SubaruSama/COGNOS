@@ -125,8 +125,13 @@ class BreachedSpider:
     def go_to_page(self, browser: WebDriver, url: str) -> None:
         browser.load_url(url, wait_for_page_body=True)
 
-    def make_search(self) -> None:
-        pass
+    def make_search(self, browser: WebDriver) -> None:
+        keyword = "vulnerability"
+        # keywords = ['vulnerability', 'exploit']
+        search_field = browser.find_element(By.NAME, "keywords")
+        search_button = browser.find_element(By.NAME, "submit")
+        search_field.send_keys(keyword)
+        search_button.click()
 
     def get_path_all_threads(self, html_content: str) -> list:
         # Get the path of ALL threads from ALL results in the results page
