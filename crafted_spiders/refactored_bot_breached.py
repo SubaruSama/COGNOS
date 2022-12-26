@@ -133,9 +133,21 @@ class BreachedSpider:
         search_field.send_keys(keyword)
         search_button.click()
 
-    def get_path_all_threads(self, html_content: str) -> list:
+    def get_path_all_threads(self, browser: WebDriver, html_content: str) -> list:
         # Get the path of ALL threads from ALL results in the results page
-        pass
+        css_thread_post_pattern = "tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)"
+        css_elements = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern)
+        paths = [elem.get_attribute("href") for elem in css_elements]
+
+        # Check for next page
+        next_page_exists = self.next_page_present(browser, html_content)
+
+        if next_page_exists:
+            self.go_to_next_page(browser)
+            self.get_path_all_threads(browser, html_content)
+        else:
+            # Return the list of all paths
+            return paths
 
     def extract_contents_from_posts(self, html_content: str) -> str:
         pass
@@ -144,10 +156,10 @@ class BreachedSpider:
         self.go_to_page(url)
         pass
 
-    def next_page_present(self) -> bool:
+    def next_page_present(self, browser: WebDriver, html_content: str) -> bool:
         pass
 
-    def go_to_next_page(self) -> None:
+    def go_to_next_page(self, browser: WebDriver) -> None:
         pass
 
     @classmethod
@@ -183,8 +195,7 @@ class BreachedSpider:
             username, password, browser
         )
 
-
-        self.make_search()
+        self.make_search(browser)
 
         # Collect all the paths from all threads
         paths = self.get_path_all_threads()

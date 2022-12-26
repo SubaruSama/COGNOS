@@ -6,6 +6,6 @@
     - [X] Return the source of the page (browser.page_source)
     - [X] Go to page (browser.load_url(url, wait_for_page_body=True))
     - [X] Make search
-- [ ] Implement the methods for collect the paths from all the threads
+- [X] Implement the methods for collect the paths from all the threads
 - [ ] Implement the methods to scrape the posts of threads collected
 - [ ] Implement the write to file the results
