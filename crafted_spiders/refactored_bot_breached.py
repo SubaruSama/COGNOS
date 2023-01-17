@@ -29,6 +29,7 @@ CREDENTIALS_PATH = "/home/user/Documents/COGNOS/crafted_spiders/cred.toml"
 urls = {
     "breached_hidden_service_base": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion",
     "breached_login_hidden_service": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion/login",
+    "breached_hidden_service_search": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion/search",
     "check_tor": "https://check.torproject.org/",
 }
 
@@ -176,6 +177,7 @@ class BreachedSpider:
             self.logger.debug(f"Exception ocurred at {self.next_page_present.__qualname__}!")
             self.logger.debug(f"Message: {e.msg}")
             self.logger.debug(f"Stacktrace: {e.stacktrace}")
+            self.close_browser()
 
         if next_page_button_present is not None:
             return True
@@ -218,25 +220,28 @@ class BreachedSpider:
                 username, password, browser
             )
 
+            self.logger.debug(f'Going to the page: {urls.get("breached_hidden_service_search", "URL not registered in the dict")}')
+            self.go_to_page(browser, urls.get("breached_hidden_service_search", "URL not registered in the dict"))
             self.make_search(browser)
 
             # Collect all the paths from all threads
-            html_content = self.get_page_source(browser)
-            paths = self.get_path_all_threads(browser, html_content)
-            all_paths_gathered = False
-            while all_paths_gathered is not True:
-                for path in paths:
-                    # 1. Collect the path from each thread
-                    # 2. Check if next page exists
-                    next_page_present = self.next_page_present(browser)
-                    if next_page_present:
-                        self.go_to_next_page()
-                    #   2.1 If yes, go to the next page
-                    #   2.2 If no, start scraping the threads
-                    pass
-                else:
-                    # Scrape the posts, call the method for it
-                    all_paths_gathered = True
+            # html_content = self.get_page_source(browser)
+            paths = self.get_path_all_threads(browser)
+            self.logger.debug(f"Pahts gathered: {paths}")
+            # all_paths_gathered = False
+            # while all_paths_gathered is not True:
+            #     for path in paths:
+            #         # 1. Collect the path from each thread
+            #         # 2. Check if next page exists
+            #         next_page_present = self.next_page_present(browser)
+            #         if next_page_present:
+            #             self.go_to_next_page()
+            #         #   2.1 If yes, go to the next page
+            #         #   2.2 If no, start scraping the threads
+            #         pass
+            #     else:
+            #         # Scrape the posts, call the method for it
+            #         all_paths_gathered = True
 
             # With the list of all threads, enter each thread and collect
             # the posts
