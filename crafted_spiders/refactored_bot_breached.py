@@ -35,7 +35,7 @@ urls = {
 
 
 class BreachedSpider:
-    scraped_paths = []
+    scraped_paths = list()
 
     def __init__(
         self,
@@ -145,7 +145,10 @@ class BreachedSpider:
         css_thread_post_pattern = "tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)"
         css_elements = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern)
         paths = [elem.get_attribute("href") for elem in css_elements]
+        self.logger.debug(f"Paths gathered: {paths}")
+        self.logger.debug(f"Appeding paths to scraped_paths...")
         self.scraped_paths.append(paths)
+        self.logger.debug(f"Appended {paths} to {self.scraped_paths}")
 
         # Check for next page
         next_page_exists = self.next_page_present(browser)
@@ -250,12 +253,13 @@ class BreachedSpider:
             while is_scraping_done is not True:
                 for url in urls_from_threads:
                     self.enter_thread(url)
+                    html_content = self.get_page_source(browser)
                     post_contents = self.extract_contents_from_posts(html_content)
                     BreachedSpider.write_to_file(post_contents)
                     next_page_exists = self.next_page_present()
                     if next_page_exists:
                         self.go_to_next_page()
-                        continue
+                        return
                 else:
                     is_scraping_done = True
 
