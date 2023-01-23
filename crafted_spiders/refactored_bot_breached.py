@@ -110,9 +110,15 @@ class BreachedSpider:
 
     def check_login_succesful(self, browser: WebDriver) -> bool:
         try:
-            if browser.find_element(By.CLASS_NAME, "rf_noob"):
+            badge = WebDriverWait(browser, 20).until(
+                EC.presence_of_all_elements_located(
+                    (By.CLASS_NAME, "rf_noob")
+                )
+            )
+            if badge:
                 self.logger.debug("Login successul")
                 return True
+            # if browser.find_element(By.CLASS_NAME, "rf_noob"):  
         except NoSuchElementException as e:
             self.logger.debug("Exception ocurred!")
             self.logger.debug(f"Message: {e.msg}")
@@ -142,13 +148,36 @@ class BreachedSpider:
 
     def get_path_all_threads(self, browser: WebDriver) -> list:
         # Get the path of ALL threads from ALL results in the results page
-        css_thread_post_pattern = "tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)"
-        css_elements = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern)
-        paths = [elem.get_attribute("href") for elem in css_elements]
+        # css_thread_post_pattern = "tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)"
+        css_thread_post_pattern_tdrow1 = "tr.inline_row > td.trow1:nth-child(3) > div > span > a.subject_new"
+        css_thread_post_pattern_tdrow2 = "tr.inline_row > td.trow2:nth-child(3) > div > span > a.subject_new"
+        tdrow1_present = WebDriverWait(browser, 30).until(
+                EC.presence_of_all_elements_located(
+                    (By.CSS_SELECTOR, css_thread_post_pattern_tdrow1)
+                )
+            )
+        if tdrow1_present:
+            css_elements_tdrow1 = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern_tdrow1)
+
+        tdrow2_present = WebDriverWait(browser, 30).until(
+                EC.presence_of_all_elements_located(
+                    (By.CSS_SELECTOR, css_thread_post_pattern_tdrow2)
+                )
+            )
+        if tdrow2_present:
+            css_elements_tdrow2 = browser.find_elements(By.CSS_SELECTOR, css_thread_post_pattern_tdrow2)
+
+        paths_tdrow1 = [elem.get_attribute("href") for elem in css_elements_tdrow1]
+        paths_tdrow2 = [elem.get_attribute("href") for elem in css_elements_tdrow2]
+        paths = [*paths_tdrow1, *paths_tdrow2]
+        with open("../../scraped_paths.txt", "a") as file:
+            if file.writable():
+                for path in paths:
+                    file.write(f"{path}\n")
+
         self.logger.debug(f"Paths gathered: {paths}")
-        self.logger.debug(f"Appeding paths to scraped_paths...")
+        self.logger.debug(f"Appending paths to scraped_paths...")
         self.scraped_paths.append(paths)
-        self.logger.debug(f"Appended {paths} to {self.scraped_paths}")
 
         # Check for next page
         next_page_exists = self.next_page_present(browser)
@@ -171,7 +200,7 @@ class BreachedSpider:
     def next_page_present(self, browser: WebDriver) -> bool:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
         try:
-            next_page_button_present = WebDriverWait(browser, 10).until(
+            next_page_button_present = WebDriverWait(browser, 20).until(
                 EC.presence_of_all_elements_located(
                     (By.XPATH, xpath_next_page_pattern)
                 )
@@ -230,7 +259,9 @@ class BreachedSpider:
             # Collect all the paths from all threads
             # html_content = self.get_page_source(browser)
             paths = self.get_path_all_threads(browser)
+            self.logger.debug(f"Type of paths: {type(paths)}")
             self.logger.debug(f"Pahts gathered: {paths}")
+            self.logger.debug(f"scraped_paths: {self.scraped_paths}")
             # all_paths_gathered = False
             # while all_paths_gathered is not True:
             #     for path in paths:
