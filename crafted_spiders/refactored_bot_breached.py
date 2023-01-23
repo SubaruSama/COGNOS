@@ -149,8 +149,10 @@ class BreachedSpider:
     def get_path_all_threads(self, browser: WebDriver) -> list:
         # Get the path of ALL threads from ALL results in the results page
         # css_thread_post_pattern = "tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)"
-        css_thread_post_pattern_tdrow1 = "tr.inline_row > td.trow1:nth-child(3) > div > span > a.subject_new"
-        css_thread_post_pattern_tdrow2 = "tr.inline_row > td.trow2:nth-child(3) > div > span > a.subject_new"
+        # css_thread_post_pattern_tdrow1 = "tr.inline_row > td.trow1:nth-child(3) > div > span > a.subject_new"
+        css_thread_post_pattern_tdrow1 = "tr.inline_row > td.trow1:nth-child(3) > div > span > a[class*='subject']"
+        # css_thread_post_pattern_tdrow2 = "tr.inline_row > td.trow2:nth-child(3) > div > span > a.subject_new"
+        css_thread_post_pattern_tdrow2 = "tr.inline_row > td.trow2:nth-child(3) > div > span > a[class*='subject']"
         tdrow1_present = WebDriverWait(browser, 30).until(
                 EC.presence_of_all_elements_located(
                     (By.CSS_SELECTOR, css_thread_post_pattern_tdrow1)
@@ -169,6 +171,7 @@ class BreachedSpider:
 
         paths_tdrow1 = [elem.get_attribute("href") for elem in css_elements_tdrow1]
         paths_tdrow2 = [elem.get_attribute("href") for elem in css_elements_tdrow2]
+
         paths = [*paths_tdrow1, *paths_tdrow2]
         with open("../../scraped_paths.txt", "a") as file:
             if file.writable():
