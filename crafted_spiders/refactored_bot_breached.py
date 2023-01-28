@@ -26,6 +26,10 @@ from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
 
 CREDENTIALS_PATH = "/home/user/Documents/COGNOS/crafted_spiders/cred.toml"
+PATHS = {
+    "scraped_paths_file": "../../scraped_paths.txt"
+}
+
 urls = {
     "breached_hidden_service_base": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion",
     "breached_login_hidden_service": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion/login",
@@ -33,9 +37,7 @@ urls = {
     "check_tor": "https://check.torproject.org/",
 }
 
-
 class BreachedSpider:
-    scraped_paths = list()
 
     def __init__(
         self,
@@ -146,7 +148,7 @@ class BreachedSpider:
         search_field.send_keys(keyword)
         search_button.click()
 
-    def get_path_all_threads(self, browser: WebDriver) -> list:
+    def get_path_all_threads(self, browser: WebDriver) -> None:
         # Get the path of ALL threads from ALL results in the results page
         # css_thread_post_pattern = "tr.inline_row:nth-child(n) > td:nth-child(n) > div:nth-child(n) > span:nth-child(n) > a:nth-child(even)"
         # css_thread_post_pattern_tdrow1 = "tr.inline_row > td.trow1:nth-child(3) > div > span > a.subject_new"
@@ -173,14 +175,10 @@ class BreachedSpider:
         paths_tdrow2 = [elem.get_attribute("href") for elem in css_elements_tdrow2]
 
         paths = [*paths_tdrow1, *paths_tdrow2]
-        with open("../../scraped_paths.txt", "a") as file:
+        with open(PATHS.get("scraped_paths_file", "File not found"), "a") as file:
             if file.writable():
                 for path in paths:
                     file.write(f"{path}\n")
-
-        self.logger.debug(f"Paths gathered: {paths}")
-        self.logger.debug(f"Appending paths to scraped_paths...")
-        self.scraped_paths.append(paths)
 
         # Check for next page
         next_page_exists = self.next_page_present(browser)
@@ -189,43 +187,77 @@ class BreachedSpider:
             self.go_to_next_page(browser)
             self.get_path_all_threads(browser)
         else:
-            # Return the list of all paths
-            # return paths
-            return self.scraped_paths
+            return
 
-    def extract_contents_from_posts(self, html_content: str) -> str:
-        pass
+    def extract_contents_from_posts(self, browser: WebDriver) -> str:
+        self.logger.debug(f"Received argument browser {browser}")
+        xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
+        title = browser.find_element(
+            By.XPATH, xpath_title
+        ).text
+        self.logger.debug(f"Title from browser: {title}")
+
+        xpath_posts = '//*[@id="posts"]'
+        posts = browser.find_elements(
+            By.XPATH, xpath_posts
+        )
+        self.logger.debug(f"{posts}")
+
+        xpath_post_contents = '/*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+        for _ in posts:
+            post_contents = WebDriverWait(browser, 20).until(
+                EC.presence_of_all_elements_located(
+                    (By.XPATH, xpath_post_contents)
+                )
+            )
+
+            post_content = [content.text for content in post_contents]
+            self.logger.debug(f"{post_content}")
+
+        BreachedSpider.write_to_file(
+            post_content,
+            filename="scraped_results",
+            filepath="../../"
+        )
+
+        next_page_exists = self.next_page_present()
+        if next_page_exists:
+            self.go_to_next_page(browser)
+            self.extract_contents_from_posts(browser)
+
+    @staticmethod
+    def load_paths(filepath: str) -> list:
+        with open(filepath, 'r') as file:
+            paths = file.readlines()
+
+        return paths
 
     def enter_thread(self, url: str) -> None:
         self.go_to_page(url)
-        pass
 
     def next_page_present(self, browser: WebDriver) -> bool:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
-        try:
-            next_page_button_present = WebDriverWait(browser, 20).until(
-                EC.presence_of_all_elements_located(
-                    (By.XPATH, xpath_next_page_pattern)
-                )
+        next_page_button_present = WebDriverWait(browser, 30).until(
+            EC.presence_of_all_elements_located(
+                (By.XPATH, xpath_next_page_pattern)
             )
-        except NoSuchElementException as e:
-            self.logger.debug(f"Exception ocurred at {self.next_page_present.__qualname__}!")
-            self.logger.debug(f"Message: {e.msg}")
-            self.logger.debug(f"Stacktrace: {e.stacktrace}")
-            self.close_browser()
+        )
 
         if next_page_button_present is not None:
             return True
-
-        return False
+        else:
+            return False
 
     def go_to_next_page(self, browser: WebDriver) -> None:
         next_page_button = browser.find_element(By.CLASS_NAME, "pagination_next")
         next_page_button.click()
 
     @classmethod
-    def write_to_file(cls, filename, filepath, file_extension) -> None:
-        pass
+    def write_to_file(cls, item: list, filename: str, filepath: str, file_extension: str = ".txt") -> None:
+        with open(f"{filepath}{filename}{file_extension}", mode="a+") as scraped_results:
+            if scraped_results.writable():
+                for i in item:
+                    scraped_results.write(i)
 
     def scrape(self):
         self.logger.debug("Logger created.")
@@ -260,42 +292,15 @@ class BreachedSpider:
             self.make_search(browser)
 
             # Collect all the paths from all threads
-            # html_content = self.get_page_source(browser)
-            paths = self.get_path_all_threads(browser)
-            self.logger.debug(f"Type of paths: {type(paths)}")
-            self.logger.debug(f"Pahts gathered: {paths}")
-            self.logger.debug(f"scraped_paths: {self.scraped_paths}")
-            # all_paths_gathered = False
-            # while all_paths_gathered is not True:
-            #     for path in paths:
-            #         # 1. Collect the path from each thread
-            #         # 2. Check if next page exists
-            #         next_page_present = self.next_page_present(browser)
-            #         if next_page_present:
-            #             self.go_to_next_page()
-            #         #   2.1 If yes, go to the next page
-            #         #   2.2 If no, start scraping the threads
-            #         pass
-            #     else:
-            #         # Scrape the posts, call the method for it
-            #         all_paths_gathered = True
+            self.get_path_all_threads(browser)
 
-            # With the list of all threads, enter each thread and collect
-            # the posts
-            is_scraping_done = False
-            urls_from_threads = paths
-            while is_scraping_done is not True:
-                for url in urls_from_threads:
-                    self.enter_thread(url)
-                    html_content = self.get_page_source(browser)
-                    post_contents = self.extract_contents_from_posts(html_content)
-                    BreachedSpider.write_to_file(post_contents)
-                    next_page_exists = self.next_page_present()
-                    if next_page_exists:
-                        self.go_to_next_page()
-                        return
-                else:
-                    is_scraping_done = True
+            self.logger.debug("Loading the paths from file...")
+            paths_to_scrape = BreachedSpider.load_paths(PATHS.get("scraped_paths_file", "File not found"))
+            self.logger.debug(f"Loaded paths from file: {paths_to_scrape[0:50]}")
+
+            for path in paths_to_scrape:
+                self.enter_thread(path)
+                self.extract_contents_from_posts(browser)
 
             self.close_browser()
 
