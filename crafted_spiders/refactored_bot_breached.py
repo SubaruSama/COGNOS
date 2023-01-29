@@ -53,9 +53,9 @@ class BreachedSpider:
         self.logger = self.setup_logging()
 
     def setup_logging(self) -> logging.Logger:
-        logger = logging.getLogger("selenium_log")
+        logger = logging.getLogger("selenium_log_posts")
         logger.setLevel(logging.DEBUG)
-        selenium_logger_handler = logging.FileHandler("selenium_log.log")
+        selenium_logger_handler = logging.FileHandler("selenium_log_posts.log")
         selenium_formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
         selenium_logger_handler.setFormatter(selenium_formatter)
         logger.addHandler(selenium_logger_handler)
