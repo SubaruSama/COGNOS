@@ -49,7 +49,7 @@ class BreachedSpider_Threads:
         logger = logging.getLogger("selenium_log_threads")
         logger.setLevel(logging.DEBUG)
         selenium_logger_handler = logging.FileHandler("selenium_log_threads.log")
-        selenium_formatter = logging.Formatter("%(name)s - %(levelname)s - %(message)s")
+        selenium_formatter = logging.Formatter("[%(asctime)s] %(name)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s")
         selenium_logger_handler.setFormatter(selenium_formatter)
         logger.addHandler(selenium_logger_handler)
 
@@ -121,7 +121,7 @@ class BreachedSpider_Threads:
     def go_to_next_page(self, browser: WebDriver) -> None:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
         next_page_button_present = WebDriverWait(browser, 30).until(
-            EC.presence_of_all_elements_located((By.XPATH, xpath_next_page_pattern))
+            EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
         )
 
         if next_page_button_present:
@@ -130,8 +130,8 @@ class BreachedSpider_Threads:
 
     def next_page_present(self, browser: WebDriver) -> bool:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
-        next_page_button_present = WebDriverWait(browser, 20).until(
-            EC.presence_of_all_elements_located((By.XPATH, xpath_next_page_pattern))
+        next_page_button_present = WebDriverWait(browser, 60).until(
+            EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
         )
 
         if next_page_button_present is not None:
@@ -159,7 +159,7 @@ class BreachedSpider_Threads:
 
         xpath_post_contents = '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
         for _ in posts:
-            post_contents = WebDriverWait(browser, 30).until(
+            post_contents = WebDriverWait(browser, 60).until(
                 EC.presence_of_all_elements_located((By.XPATH, xpath_post_contents))
             )
 
@@ -167,7 +167,7 @@ class BreachedSpider_Threads:
         self.logger.debug(f"{post_content}")
 
         BreachedSpider_Threads.write_to_file(
-            post_content, filename="scraped_posts", filepath="../../results/"
+            post_content, filename="scraped_posts_dev", filepath="../../results/"
         )
 
         next_page_exists = self.next_page_present(browser)
