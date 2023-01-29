@@ -119,12 +119,18 @@ class BreachedSpider_Threads:
                     scraped_results.write(i)
 
     def go_to_next_page(self, browser: WebDriver) -> None:
-        next_page_button = browser.find_element(By.CLASS_NAME, "pagination_next")
-        next_page_button.click()
+        xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
+        next_page_button_present = WebDriverWait(browser, 30).until(
+            EC.presence_of_all_elements_located((By.XPATH, xpath_next_page_pattern))
+        )
+
+        if next_page_button_present:
+            next_page_button = browser.find_element(By.XPATH, xpath_next_page_pattern)
+            next_page_button.click()
 
     def next_page_present(self, browser: WebDriver) -> bool:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
-        next_page_button_present = WebDriverWait(browser, 30).until(
+        next_page_button_present = WebDriverWait(browser, 20).until(
             EC.presence_of_all_elements_located((By.XPATH, xpath_next_page_pattern))
         )
 
@@ -144,35 +150,27 @@ class BreachedSpider_Threads:
         self.logger.debug(f"Received argument browser {browser}")
 
         xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
-        title = browser.find_element(
-            By.XPATH, xpath_title
-        ).text
+        title = browser.find_element(By.XPATH, xpath_title).text
         self.logger.debug(f"Title from browser: {title}")
 
         xpath_posts = '//*[@id="posts"]'
-        posts = browser.find_elements(
-            By.XPATH, xpath_posts
-        )
-        self.logger.debug(f"{posts}")
+        posts = browser.find_elements(By.XPATH, xpath_posts)
+        self.logger.debug(f"{[post for post in posts]}")
 
-        xpath_post_contents = '/*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+        xpath_post_contents = '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
         for _ in posts:
             post_contents = WebDriverWait(browser, 30).until(
-                EC.presence_of_all_elements_located(
-                    (By.XPATH, xpath_post_contents)
-                )
+                EC.presence_of_all_elements_located((By.XPATH, xpath_post_contents))
             )
 
         post_content = [content.text for content in post_contents]
         self.logger.debug(f"{post_content}")
 
         BreachedSpider_Threads.write_to_file(
-            post_content,
-            filename="scraped_posts",
-            filepath="../../results/"
+            post_content, filename="scraped_posts", filepath="../../results/"
         )
 
-        next_page_exists = self.next_page_present()
+        next_page_exists = self.next_page_present(browser)
         if next_page_exists:
             self.go_to_next_page(browser)
             self.extract_contents_from_post(browser)
@@ -185,7 +183,12 @@ class BreachedSpider_Threads:
             self.logger.debug("Browser opened.")
 
             self.logger.debug("Going to the login page...")
-            self.go_to_page(browser, urls.get("breached_login_hidden_service", "URL not registered in the dict"))
+            self.go_to_page(
+                browser,
+                urls.get(
+                    "breached_login_hidden_service", "URL not registered in the dict"
+                ),
+            )
 
             self.logger.debug("Loading credentials...")
             username, password = self.load_credentials(CREDENTIALS_PATH)
@@ -199,11 +202,13 @@ class BreachedSpider_Threads:
             for path in paths_to_scrape:
                 self.logger.debug(f"Entering the path: {path}")
                 self.go_to_page(browser, path)
-                self.extract_contents_from_post(browser)
+                post_content = self.extract_contents_from_post(browser)
+                self.logger.debug(post_content)
 
         except Exception as e:
             self.logger.debug("Something went wrong.")
             self.logger.debug(f"Exception: {e}")
+
 
 spider = BreachedSpider_Threads("scraped_posts", "../../")
 spider.scrape_threads()
