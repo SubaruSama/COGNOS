@@ -59,6 +59,7 @@ class BreachedSpider_Threads:
         try:
             self.logger.debug("Opening tor browser...")
             tor_process = launch_tbb_tor_with_stem(tbb_path=self.tbb_dir)
+            self.logger.debug(f"Tor process: {tor_process}")
             browser = TorBrowserDriver(self.tbb_dir, tor_cfg=cm.USE_STEM)
 
             return browser
@@ -120,7 +121,7 @@ class BreachedSpider_Threads:
 
     def go_to_next_page(self, browser: WebDriver) -> None:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
-        next_page_button_present = WebDriverWait(browser, 30).until(
+        next_page_button_present = WebDriverWait(browser, 60).until(
             EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
         )
 
@@ -149,11 +150,11 @@ class BreachedSpider_Threads:
     def extract_contents_from_post(self, browser: WebDriver) -> str:
         self.logger.debug(f"Received argument browser {browser}")
 
-        time.sleep(10)
+        browser.implicitly_wait(10)
 
         xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
         title = WebDriverWait(browser, 120).until(
-            EC.presence_of_element_located((By.XPATH, xpath_title).text)
+            EC.presence_of_element_located((By.XPATH, xpath_title))
         )
         self.logger.debug(f"Title from browser: {title}")
 
@@ -170,7 +171,6 @@ class BreachedSpider_Threads:
                     EC.visibility_of_all_elements_located((By.XPATH, xpath_post_contents)),
                     EC.presence_of_all_elements_located((By.CLASS_NAME, '.post_body'))
                 )
-                
             )
 
         post_content = [f'{content.text}\n' for content in post_contents]
