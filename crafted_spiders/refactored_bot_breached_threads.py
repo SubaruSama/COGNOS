@@ -149,21 +149,31 @@ class BreachedSpider_Threads:
     def extract_contents_from_post(self, browser: WebDriver) -> str:
         self.logger.debug(f"Received argument browser {browser}")
 
+        time.sleep(10)
+
         xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
-        title = browser.find_element(By.XPATH, xpath_title).text
+        title = WebDriverWait(browser, 120).until(
+            EC.presence_of_element_located((By.XPATH, xpath_title).text)
+        )
         self.logger.debug(f"Title from browser: {title}")
 
         xpath_posts = '//*[@id="posts"]'
         posts = browser.find_elements(By.XPATH, xpath_posts)
-        self.logger.debug(f"{[post for post in posts]}")
+        self.logger.debug(f"Posts type: {type(posts)}")
+        self.logger.debug(f"{posts}")
 
         xpath_post_contents = '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+
         for _ in posts:
-            post_contents = WebDriverWait(browser, 60).until(
-                EC.presence_of_all_elements_located((By.XPATH, xpath_post_contents))
+            post_contents = WebDriverWait(browser, 120).until(
+                EC.any_of(
+                    EC.visibility_of_all_elements_located((By.XPATH, xpath_post_contents)),
+                    EC.presence_of_all_elements_located((By.CLASS_NAME, '.post_body'))
+                )
+                
             )
 
-        post_content = [content.text for content in post_contents]
+        post_content = [f'{content.text}\n' for content in post_contents]
         self.logger.debug(f"{post_content}")
 
         BreachedSpider_Threads.write_to_file(
