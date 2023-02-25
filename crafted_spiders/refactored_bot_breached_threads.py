@@ -22,7 +22,8 @@ from tbselenium.tbdriver import TorBrowserDriver
 from tbselenium.utils import launch_tbb_tor_with_stem
 
 CREDENTIALS_PATH = "/home/user/Documents/COGNOS/crafted_spiders/cred.toml"
-SCRAPED_PATHS = "../../results/scraped_paths.txt"
+SCRAPED_PATHS_VULN = "../../results/scraped_paths_vulnerability.txt"
+SCRAPED_PATHS_XPL = "../../results/scraped_paths_exploit.txt"
 
 urls = {
     "breached_hidden_service_base": "http://breached65xqh64s7xbkvqgg7bmj4nj7656hcb7x4g42x753r7zmejqd.onion",
@@ -131,14 +132,15 @@ class BreachedSpider_Threads:
 
     def next_page_present(self, browser: WebDriver) -> bool:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
-        next_page_button_present = WebDriverWait(browser, 60).until(
-            EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
-        )
+        try:
+            next_page_button_present = WebDriverWait(browser, 60).until(
+                EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
+            )
+        except NoSuchElementException:
+            return False
 
         if next_page_button_present is not None:
             return True
-        else:
-            return False
 
     @staticmethod
     def load_paths(filepath: str) -> list:
@@ -147,10 +149,8 @@ class BreachedSpider_Threads:
 
         return paths
 
-    def extract_contents_from_post(self, browser: WebDriver) -> str:
+    def extract_contents_from_post(self, browser: WebDriver) -> None:
         self.logger.debug(f"Received argument browser {browser}")
-
-        browser.implicitly_wait(10)
 
         xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
         title = WebDriverWait(browser, 120).until(
@@ -159,31 +159,36 @@ class BreachedSpider_Threads:
         self.logger.debug(f"Title from browser: {title}")
 
         xpath_posts = '//*[@id="posts"]'
-        posts = browser.find_elements(By.XPATH, xpath_posts)
-        self.logger.debug(f"Posts type: {type(posts)}")
-        self.logger.debug(f"{posts}")
-
         xpath_post_contents = '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
 
-        for _ in posts:
-            post_contents = WebDriverWait(browser, 120).until(
-                EC.any_of(
-                    EC.visibility_of_all_elements_located((By.XPATH, xpath_post_contents)),
-                    EC.presence_of_all_elements_located((By.CLASS_NAME, '.post_body'))
+        next_page_exists = self.next_page_present(browser)
+
+        while next_page_exists != False:
+            time.sleep(10)
+
+            posts = browser.find_elements(By.XPATH, xpath_posts)
+            self.logger.debug(f"Posts type: {type(posts)}")
+            self.logger.debug(f"{posts}")
+
+            for _ in posts:
+                post_contents = WebDriverWait(browser, 120).until(
+                    EC.any_of(
+                        EC.visibility_of_all_elements_located((By.XPATH, xpath_post_contents)),
+                        EC.presence_of_all_elements_located((By.CLASS_NAME, '.post_body'))
+                    )
                 )
+
+            post_content = [f'{content.text}\n' for content in post_contents]
+            self.logger.debug(f"{post_content}")
+
+            BreachedSpider_Threads.write_to_file(
+                post_content, filename="scraped_posts_vulnerability_dev", filepath="../../results/"
             )
 
-        post_content = [f'{content.text}\n' for content in post_contents]
-        self.logger.debug(f"{post_content}")
+            next_page_exists = self.next_page_present(browser)
 
-        BreachedSpider_Threads.write_to_file(
-            post_content, filename="scraped_posts_dev", filepath="../../results/"
-        )
-
-        next_page_exists = self.next_page_present(browser)
-        if next_page_exists:
-            self.go_to_next_page(browser)
-            self.extract_contents_from_post(browser)
+            if next_page_exists:
+                self.go_to_next_page(browser)
 
     def scrape_threads(self):
         self.logger.debug("Logger created.")
@@ -205,19 +210,19 @@ class BreachedSpider_Threads:
             self.logger.debug("Logging in...")
             self.login(username, password, browser)
 
-            self.logger.debug(f"{SCRAPED_PATHS}")
-            paths_to_scrape = BreachedSpider_Threads.load_paths(SCRAPED_PATHS)
-            self.logger.debug(f"Paths to scrape: {paths_to_scrape[:10]}")
+            self.logger.debug(f"{SCRAPED_PATHS_VULN}")
+            paths_to_scrape = BreachedSpider_Threads.load_paths(SCRAPED_PATHS_VULN)
+            self.logger.debug(f"Paths to scrape [:10]: {paths_to_scrape[:10]}")
 
             for path in paths_to_scrape:
                 self.logger.debug(f"Entering the path: {path}")
                 self.go_to_page(browser, path)
-                post_content = self.extract_contents_from_post(browser)
-                self.logger.debug(post_content)
+                self.extract_contents_from_post(browser)
 
-        except Exception as e:
+        except NoSuchElementException as e:
             self.logger.debug("Something went wrong.")
-            self.logger.debug(f"Exception: {e}")
+            self.logger.debug(f"Exception: {e.msg}")
+            self.logger.debug(f"Stacktrace: {e.stacktrace}")
 
 
 spider = BreachedSpider_Threads("scraped_posts", "../../")
