@@ -1,12 +1,13 @@
 #!/home/user/Documents/COGNOS/venv_cognos/bin/python3.10
 import time
 import logging
+from enum import Enum
 
 import pytomlpp
 import tbselenium.common as cm
 
 # from selenium import webdriver
-from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.common.by import By
 
 # For problems when some object is not loaded
@@ -32,6 +33,15 @@ urls = {
 }
 
 
+class Patterns(Enum):
+    # Just a utility enum. When i will refactor all of this project, this part will be a
+    # separate config file (yaml, json, whatever)
+    xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
+    xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
+    xpath_posts = '//*[@id="posts"]'
+    xpath_post_contents = '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+
+
 class BreachedSpider_Threads:
     def __init__(
         self,
@@ -50,7 +60,9 @@ class BreachedSpider_Threads:
         logger = logging.getLogger("selenium_log_threads")
         logger.setLevel(logging.DEBUG)
         selenium_logger_handler = logging.FileHandler("selenium_log_threads.log")
-        selenium_formatter = logging.Formatter("[%(asctime)s] %(name)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s")
+        selenium_formatter = logging.Formatter(
+            "[%(asctime)s] %(name)s - %(levelname)s - %(module)s - %(funcName)s - %(lineno)d - %(message)s"
+        )
         selenium_logger_handler.setFormatter(selenium_formatter)
         logger.addHandler(selenium_logger_handler)
 
@@ -120,16 +132,13 @@ class BreachedSpider_Threads:
                 for i in item:
                     scraped_results.write(i)
 
-    def go_to_next_page(self, browser: WebDriver) -> None:
-        xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
-        next_page_button_present = WebDriverWait(browser, 60).until(
-            EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
-        )
+    def go_to_next_page(self, browser: WebDriver, xpath_next_page_pattern: str) -> None:
+        # Dont use the Exptected Condition here, because i will assume
+        # that if self.next_page_available return True, the page has loaded the element properly
+        next_page_button = browser.find_element(By.XPATH, xpath_next_page_pattern)
+        next_page_button.click()
 
-        if next_page_button_present:
-            next_page_button = browser.find_element(By.XPATH, xpath_next_page_pattern)
-            next_page_button.click()
-
+    @DeprecationWarning
     def next_page_present(self, browser: WebDriver) -> bool:
         xpath_next_page_pattern = '/html//a[@class = "pagination_next"]'
         try:
@@ -137,6 +146,23 @@ class BreachedSpider_Threads:
                 EC.presence_of_element_located((By.XPATH, xpath_next_page_pattern))
             )
         except NoSuchElementException:
+            return False
+
+        if next_page_button_present is not None:
+            return True
+
+    def next_page_available(
+        self, browser: WebDriver, xpath_next_page_pattern: str
+    ) -> bool:
+        # Check if exists next page.
+        # If yes, return True; if no, return False
+        # use only here the Expected Condition
+        try:
+            next_page_button_present = WebDriverWait(browser, 3).until(
+                EC.element_to_be_clickable((By.XPATH, xpath_next_page_pattern))
+            )
+        except (NoSuchElementException, TimeoutException):
+            self.logger.debug("No more next pages available...")
             return False
 
         if next_page_button_present is not None:
@@ -152,46 +178,58 @@ class BreachedSpider_Threads:
     def extract_contents_from_post(self, browser: WebDriver) -> None:
         self.logger.debug(f"Received argument browser {browser}")
 
-        xpath_title = "/html/body/div[1]/main/table[1]/tbody/tr[1]/td/div/span"
         title = WebDriverWait(browser, 120).until(
-            EC.presence_of_element_located((By.XPATH, xpath_title))
+            EC.presence_of_element_located((By.XPATH, Patterns.xpath_title.value))
         )
         self.logger.debug(f"Title from browser: {title}")
 
-        xpath_posts = '//*[@id="posts"]'
-        xpath_post_contents = '//*[@id="posts"]/div[*]/div[2]/div[1]/div[2]'
+        next_page_available = self.next_page_available(
+            browser, Patterns.xpath_next_page_pattern.value
+        )
 
-        next_page_exists = self.next_page_present(browser)
-
-        while next_page_exists != False:
+        while next_page_available != False:
             time.sleep(10)
 
-            posts = browser.find_elements(By.XPATH, xpath_posts)
+            posts = browser.find_elements(By.XPATH, Patterns.xpath_posts.value)
             self.logger.debug(f"Posts type: {type(posts)}")
             self.logger.debug(f"{posts}")
+
+            time.sleep(10)
 
             for _ in posts:
                 post_contents = WebDriverWait(browser, 120).until(
                     EC.any_of(
-                        EC.visibility_of_all_elements_located((By.XPATH, xpath_post_contents)),
-                        EC.presence_of_all_elements_located((By.CLASS_NAME, '.post_body'))
+                        EC.visibility_of_all_elements_located(
+                            (By.XPATH, Patterns.xpath_post_contents.value)
+                        ),
+                        EC.presence_of_all_elements_located(
+                            (By.CLASS_NAME, ".post_body")
+                        ),
                     )
                 )
 
-            post_content = [f'{content.text}\n' for content in post_contents]
-            self.logger.debug(f"{post_content}")
+            try:
+                post_content = [f"{content.text}\n" for content in post_contents]
+                self.logger.debug(f"{post_content}")
+            except StaleElementReferenceException:
+                pass
 
             BreachedSpider_Threads.write_to_file(
-                post_content, filename="scraped_posts_vulnerability_dev", filepath="../../results/"
+                post_content,
+                filename="scraped_posts_vulnerability_dev",
+                filepath="../../results/",
             )
 
-            next_page_exists = self.next_page_present(browser)
+            next_page_exists = self.next_page_available(browser, Patterns.xpath_next_page_pattern.value)
 
             if next_page_exists:
-                self.go_to_next_page(browser)
+                self.go_to_next_page(browser, Patterns.xpath_next_page_pattern.value)
+            else:
+                return
 
     def scrape_threads(self):
         self.logger.debug("Logger created.")
+
         try:
             self.logger.debug("Opening browser...")
             browser = self.setup_browser()
